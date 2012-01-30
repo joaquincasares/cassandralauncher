@@ -108,7 +108,7 @@ present the option to kill a cluster these tools did not launch.
     ssh -i /Users/joaquin/DataStaxLauncher.pem -o UserKnownHostsFile=/Users/joaquin/ds_known_hosts ubuntu@23.20.9.38
 
     Choose the cluster to destroy:
-      [0] DataStaxAMI 12-16-11 02:21
+      [0] jcasares - DataStaxAMI Time: 12-16-11 02:21 Size: 4
       [1] None
     0
 

@@ -115,10 +115,10 @@ def create_keyless_ssh_ring(public_ips, user):
         node_conn = create_ssh_cmd(user, node)
 
         scp_send(user, public_ips[0], PEM_FILE)
-        exe_ssh_cmd(node_conn, "cp %s .ssh/id_rsa; chmod 600 .ssh/id_rsa" % 'DataStaxLauncher.pem')
+        exe_ssh_cmd(node_conn, "mv %s .ssh/id_rsa; chmod 600 .ssh/id_rsa" % 'DataStaxLauncher.pem')
 
         scp_send(user, public_ips[0], HOST_FILE)
-        exe_ssh_cmd(node_conn, "cp %s .ssh/known_hosts; chmod 600 .ssh/known_hosts" % 'ds_known_hosts')
+        exe_ssh_cmd(node_conn, "mv %s .ssh/known_hosts; chmod 600 .ssh/known_hosts" % 'ds_known_hosts')
 
 def prime_connections(public_ips, user):
     """Ask acceptance of RSA keys."""
@@ -134,14 +134,19 @@ def prime_connections(public_ips, user):
     # Prompt for RSA fingerprint authentication for each IP
     for ip in public_ips:
 
-        # Get public RSA key
-        rsa_key = exe('ssh-keyscan -t rsa {0}'.format(ip))[0]
-        with tempfile.NamedTemporaryFile() as tmp_file:
-            tmp_file.write(rsa_key)
-            tmp_file.flush()
+        while True:
+            # Get public RSA key
+            rsa_key = exe('ssh-keyscan -t rsa {0}'.format(ip))[0]
+            with tempfile.NamedTemporaryFile() as tmp_file:
+                tmp_file.write(rsa_key)
+                tmp_file.flush()
 
-            # Generate fingerprint
-            fingerprint = exe('ssh-keygen -l -f {0}'.format(tmp_file.name))[0].split()[1]
+                # Generate fingerprint
+                fingerprint = exe('ssh-keygen -l -f {0}'.format(tmp_file.name))[0].split()[1]
+
+            # Ensure that stderr didn't return the error message '* is not a public key file.'
+            if fingerprint != 'is':
+                break
 
         # If performing individual authentication, prompt
         if accept_rsa_fingerprints != 'all':
@@ -180,7 +185,15 @@ def install_opsc_agents(user):
     while exe_ssh_cmd(opscConn, "ls /usr/share/opscenter/agent/opscenter-agent.tar.gz")[1]:
         # The agent tarball has yet to be created
         time.sleep(5)
-        pass
+
+    # Ensures the tarball is fully written before transferring
+    while True:
+        old_md5 = exe_ssh_cmd(opscConn, "md5sum /usr/share/opscenter/agent/opscenter-agent.tar.gz")[0]
+        time.sleep(2)
+        new_md5 = exe_ssh_cmd(opscConn, "md5sum /usr/share/opscenter/agent/opscenter-agent.tar.gz")[0]
+
+        if old_md5 == new_md5:
+            break
 
     print "Installing OpsCenter Agents..."
     for i, node in enumerate(public_ips):
@@ -435,7 +448,7 @@ def main():
 
     # DataStax AMI specific options and formatting
     image = 'ami-fd23ec94'
-    tag = '{0} - DataStaxAMI - {1}'.format(check_cascading_options('handle'), time.strftime("%m-%d-%y %H:%M", time.localtime()))
+    tag = '{0} - DataStaxAMI Time: {1} Size: {2}'.format(check_cascading_options('handle'), time.strftime("%m-%d-%y %H:%M", time.localtime()), totalnodes)
     user = 'ubuntu'
 
     # Launch the cluster
