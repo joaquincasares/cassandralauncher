@@ -105,6 +105,8 @@ def prompt_rsa_fingerprints(ip, fingerprint):
     if accept_rsa_fingerprints == 'no':
         sys.exit(1)
 
+    return accept_rsa_fingerprints
+
 def create_keyless_ssh_ring(public_ips, user):
     """Create keyless SSH ring from primed servers"""
 
@@ -136,13 +138,14 @@ def prime_connections(public_ips, user):
         rsa_key = exe('ssh-keyscan -t rsa {0}'.format(ip))[0]
         with tempfile.NamedTemporaryFile() as tmp_file:
             tmp_file.write(rsa_key)
+            tmp_file.flush()
 
             # Generate fingerprint
             fingerprint = exe('ssh-keygen -l -f {0}'.format(tmp_file.name))[0].split()[1]
 
         # If performing individual authentication, prompt
         if accept_rsa_fingerprints != 'all':
-            prompt_rsa_fingerprints(ip, fingerprint)
+            accept_rsa_fingerprints = prompt_rsa_fingerprints(ip, fingerprint)
         
         # Append all public RSA keys into HOST_FILE
         with open(HOST_FILE, 'a') as f:

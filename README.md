@@ -74,14 +74,38 @@ present the option to kill a cluster these tools did not launch.
     CFS Replication Factor: 2
 
     Starting an EC2 cluster of type m1.large with image ami-fd23ec94...
+    Ensuring DataStax pem key exists on AWS...
+    Ensuring DataStax pem key exists on filesystem...
+    Ensuring DataStax pem key's permissions are acceptable...
     Configuring ports...
     Launching cluster...
     Waiting for cluster...
     Cluster booted successfully!
 
-    Connection Strings:
-    ssh -i ~/joaquinkey.pem ubuntu@ec2-107-20-61-154.compute-1.amazonaws.com
-    ssh -i ~/joaquinkey.pem ubuntu@ec2-184-73-94-212.compute-1.amazonaws.com
+    Unprimed Connection Strings:
+    ssh -i /Users/joaquin/DataStaxLauncher.pem ubuntu@107.21.193.17
+    ssh -i /Users/joaquin/DataStaxLauncher.pem ubuntu@50.17.168.25
+    ssh -i /Users/joaquin/DataStaxLauncher.pem ubuntu@107.22.1.119
+    ssh -i /Users/joaquin/DataStaxLauncher.pem ubuntu@23.20.9.38
+
+    OpsCenter Address:
+    http://107.21.193.17:8888
+    Note: You must wait 60 seconds after Cassandra becomes active to access OpsCenter.
+
+    Waiting 10 seconds for EC2 instances to warm up...
+    Priming connections...
+    The authenticity of host '107.21.193.17 (107.21.193.17)' can't be established.
+    RSA key fingerprint is d5:c7:7c:39:a7:33:5a:5c:71:03:a4:68:2f:ba:b9:59.
+    Are you sure you want to continue connecting (yes/no/all)? all
+    Creating a keyless SSH ring...
+    Waiting for the agent tarball to be created...
+    Installing OpsCenter Agents...
+
+    Primed Connection Strings:
+    ssh -i /Users/joaquin/DataStaxLauncher.pem -o UserKnownHostsFile=/Users/joaquin/ds_known_hosts ubuntu@107.21.193.17
+    ssh -i /Users/joaquin/DataStaxLauncher.pem -o UserKnownHostsFile=/Users/joaquin/ds_known_hosts ubuntu@50.17.168.25
+    ssh -i /Users/joaquin/DataStaxLauncher.pem -o UserKnownHostsFile=/Users/joaquin/ds_known_hosts ubuntu@107.22.1.119
+    ssh -i /Users/joaquin/DataStaxLauncher.pem -o UserKnownHostsFile=/Users/joaquin/ds_known_hosts ubuntu@23.20.9.38
 
     Choose the cluster to destroy:
       [0] DataStaxAMI 12-16-11 02:21
