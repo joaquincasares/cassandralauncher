@@ -12,8 +12,9 @@ except:
       from distutils.core import setup
 
 long_description = """CassandraLauncher contains two parts:
-1. `cassandralauncher` that is accessible straight from the commandline that launches a Cassandra cluster for you.
-2. `clusterlauncher` that is also accessible from the command line that is a GUI wrapper for AWS and RAX.
+
+1. `cassandralauncher` is accessible straight from the command line and launches a Cassandra cluster for you.
+2. `clusterlauncher` is also accessible from the command line and provides a user interface for AWS and RAX.
 
 Both run off of a config: clusterlauncher.conf.
 """

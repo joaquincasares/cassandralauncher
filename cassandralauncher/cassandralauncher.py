@@ -256,7 +256,7 @@ options_tree = {
     },
     'version': {
         'Section': 'Cassandra',
-        'Prompt': 'Version',
+        'Prompt': 'Version:',
         'Help': 'Community | Enterprise'
     },
     'username': {
@@ -305,7 +305,7 @@ def type_checker(option, read_option, type_check, passive=False):
             read_option = type_check(read_option)
         except:
             if passive:
-                return False
+                return None
             sys.stderr.write('"{0}" was expected to be of {1}\n'.format(option, type_check))
             sys.exit(1)
     return read_option
@@ -440,7 +440,7 @@ def main():
     clusterinfo = ec2.create_cluster(check_cascading_options('aws_access_key_id'), check_cascading_options('aws_secret_access_key'),
                                     totalnodes, image, tag, KEY_PAIR,
                                     instance_type, config.get('EC2', 'placement'), PEM_HOME,
-                                    user_data)
+                                    user_data, cli_options['CLI_noprompts'])
 
     # Save IPs
     global private_ips
@@ -449,12 +449,6 @@ def main():
 
     # Log clusterinfo
     running_log(reservation, demotime)
-
-    # Print a warning message if the pem file can't be found
-    if not os.path.isfile(PEM_FILE):
-        print "WARNING: The created pem file no longer exists at %s!" % PEM_FILE
-        print "         Please copy it out of the previous 'pem_home' directory."
-        print
 
     # Print SSH commands
     print 'Unprimed Connection Strings:'

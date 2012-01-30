@@ -190,12 +190,6 @@ def main():
                                         config.get('EC2', 'instance_type'), config.get('EC2', 'placement'), PEM_HOME, user_data)
         private_ips, public_ips, reservation = clusterinfo
 
-        # Print a warning message if the pem file can't be found
-        if not os.path.isfile(PEM_FILE):
-            print "WARNING: The created pem file no longer exists at %s!" % PEM_FILE
-            print "         Please copy it out of the previous 'pem_home' directory."
-            print
-
         printConnections(user, private_ips, public_ips, PEM_FILE)
     
     if cloud == 'Rackspace':

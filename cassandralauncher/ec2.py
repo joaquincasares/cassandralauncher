@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
-import time
+import os
+import stat
 import sys
+import time
 
 try:
     import boto
@@ -37,7 +39,7 @@ def authorize(security_group, port, realm, port_end_range=False):
 
 
 
-def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, image, tag, key_pair, instance_type, placement, pem_home, user_data=None):
+def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, image, tag, key_pair, instance_type, placement, pem_home, user_data=None, noprompts=False):
 
     # Connect to EC2
     print 'Starting an EC2 cluster of type {0} with image {1}...'.format(instance_type, image)
@@ -47,6 +49,41 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
     try:
         print "Ensuring DataStax pem key exists on AWS..."
         key = conn.get_all_key_pairs(keynames=[key_pair])[0]
+
+        print "Ensuring DataStax pem key exists on filesystem..."
+        # Print a warning message if the pem file can't be found
+        pem_file = os.path.join(pem_home, key_pair + '.pem')
+        if os.path.isfile(pem_file):
+            print "Ensuring DataStax pem key's permissions are acceptable..."
+            # Print a warning message is the pem file does not have the correct file permissions
+            permissions = os.stat(pem_file).st_mode
+            if not (bool(permissions & stat.S_IRUSR) and     # Ensure owner can read
+                    not bool(permissions & stat.S_IRWXG) and # Ensure that group has no permissions
+                    not bool(permissions & stat.S_IRWXO)):   # Ensure that others have no permissions
+
+                sys.stderr.write("WARNING: The pem file has permissions that are too open!\n\n")
+
+                if noprompts:
+                    sys.exit(1)
+                if raw_input("Do you wish to reset file permissions? [y/N] ").lower() == 'y':
+                    try:
+                        # Reset permissions
+                        os.chmod(pem_file, 0400)
+                    except:
+                        sys.stderr.write("Unable to reset file permissions!\n")
+                        if raw_input("Do you wish to continue? [y/N] ").lower() != 'y':
+                            sys.exit(1)
+                else:
+                    print "File permissions unchanged."
+                    if raw_input("Do you wish to continue? [y/N] ").lower() != 'y':
+                        sys.exit(1)
+        else:
+            sys.stderr.write("WARNING: The created pem file no longer exists at %s!\n" % pem_file)
+            sys.stderr.write("         Please copy it out of the previous 'pem_home' directory.\n\n")
+
+            if noprompts or raw_input("Do you wish to continue? [y/N] ").lower() != 'y':
+                sys.exit(1)
+
     except boto.exception.EC2ResponseError, e:
         if e.code == 'InvalidKeyPair.NotFound':
             print 'Creating keypair...'
