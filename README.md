@@ -11,21 +11,13 @@ Make sure `python-setuptools` and `python-pip` are installed, then run:
 
     pip install cassandralauncher
 
-or if installing from source:
-
-    python setup.py build
-    python setup.py install
-
 ## Setup
 
-Choose one of these things. They are checked by the programs in this order:
+Run:
 
-* Add `export CLUSTERLAUNCHER_CONF=<path>` to your `~/.bash_profile` or `~/.profile`.
-* Open clusterlauncher.conf in your git checkout repo.
-* Copy clusterlauncher.conf to `~/.clusterlauncher.conf`.
-* Open `/etc/cassandralauncher/clusterlauncher.conf`.
+    cp /etc/cassandralauncher/clusterlauncher.conf ~/.clusterlauncher.conf
 
-Edit clusterlauncher.conf with your authentication parameters.
+Edit `~/.clusterlauncher.conf` with your authentication parameters.
 
 ## Cassandra Launcher
 
@@ -112,7 +104,7 @@ present the option to kill a cluster these tools did not launch.
       [1] None
     0
 
-    Confirm you wish to terminate DataStaxAMI 12-16-11 02:21 by pressing 'y'.
+    Confirm you wish to terminate jcasares - DataStaxAMI Time: 12-16-11 02:21 Size: 4 by pressing 'y'.
     y
 
     Termination command complete.
