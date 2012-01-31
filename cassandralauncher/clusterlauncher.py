@@ -75,43 +75,52 @@ clusterChoices = {
     },
     'Rackspace': {
         'Ubuntu':{
-            '11.04':{
-                'Image': 76
+            '11.10':{
+                'Image': 119
             },
-            '10.10':{
+            '11.04':{
+                'Image': 115
+            },
+            '10.10 (deprecated)':{
                 'Image': 69
             },
             '10.04':{
-                'Image': 49
+                'Image': 112
             }
         },
         'CentOS':{
-            '5.6':{
-                'Image': 77
+            '6.0':{
+                'Image': 118
             },
-            '5.5':{
+            '5.6':{
+                'Image': 114
+            },
+            '5.5 (deprecated)':{
                 'Image': 51
             },
-            '5.4':{
+            '5.4 (deprecated)':{
                 'Image': 187811
             }
         },
         'Debian':{
             '6.0':{
-                'Image': 75
+                'Image': 104
             },
             '5.0':{
-                'Image': 4
+                'Image': 103
             }
         },
         'Fedora':{
+            '16':{
+                'Image': 120
+            },
             '15':{
-                'Image': 78
+                'Image': 116
             },
             '14':{
-                'Image': 71
+                'Image': 106
             },
-            '13':{
+            '13 (deprecated)':{
                 'Image': 53
             }
         }
