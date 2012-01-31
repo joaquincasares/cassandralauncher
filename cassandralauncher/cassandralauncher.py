@@ -179,18 +179,18 @@ def install_opsc_agents(user):
     prime_connections(public_ips, user)
 
     # Connection to the OpsCenter machine to be used later
-    opscConn = create_ssh_cmd(user, public_ips[0])
+    opsc_conn = create_ssh_cmd(user, public_ips[0])
 
     print "Waiting for the agent tarball to be created..."
-    while exe_ssh_cmd(opscConn, "ls /usr/share/opscenter/agent/opscenter-agent.tar.gz")[1]:
+    while exe_ssh_cmd(opsc_conn, "ls /usr/share/opscenter/agent/opscenter-agent.tar.gz")[1]:
         # The agent tarball has yet to be created
         time.sleep(5)
 
     # Ensures the tarball is fully written before transferring
     while True:
-        old_md5 = exe_ssh_cmd(opscConn, "md5sum /usr/share/opscenter/agent/opscenter-agent.tar.gz")[0]
+        old_md5 = exe_ssh_cmd(opsc_conn, "md5sum /usr/share/opscenter/agent/opscenter-agent.tar.gz")[0]
         time.sleep(2)
-        new_md5 = exe_ssh_cmd(opscConn, "md5sum /usr/share/opscenter/agent/opscenter-agent.tar.gz")[0]
+        new_md5 = exe_ssh_cmd(opsc_conn, "md5sum /usr/share/opscenter/agent/opscenter-agent.tar.gz")[0]
 
         if old_md5 == new_md5:
             break
@@ -200,7 +200,7 @@ def install_opsc_agents(user):
         node_conn = create_ssh_cmd(user, node)
 
         # Copying OpsCenter Agent tarball
-        exe_ssh_cmd(opscConn, "scp /usr/share/opscenter/agent/opscenter-agent.tar.gz %s:opscenter-agent.tar.gz" % node)
+        exe_ssh_cmd(opsc_conn, "scp /usr/share/opscenter/agent/opscenter-agent.tar.gz %s:opscenter-agent.tar.gz" % node)
         
         # Untarring tarball
         exe_ssh_cmd(node_conn, "sudo mv -f opscenter-agent.tar.gz /usr/share; cd /usr/share; sudo tar --overwrite -xzf opscenter-agent.tar.gz; sudo rm -f opscenter-agent.tar.gz")
