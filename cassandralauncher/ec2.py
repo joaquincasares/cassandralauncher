@@ -13,6 +13,8 @@ except:
     sys.stderr.write("and try again.\n")
     sys.exit(1)
 
+from xml.dom.minidom import parseString
+
 import common
 
 def authorize(security_group, port, realm, port_end_range=False):
@@ -37,6 +39,21 @@ def authorize(security_group, port, realm, port_end_range=False):
         # Continue since ports were probably trying to be overwritten
         pass
 
+def print_boto_error():
+    """Attempts to extract the XML from boto errors to present plain errors with no stacktraces."""
+
+    try:
+        quick_summary, null, xml = str(sys.exc_info()[1]).split('\n')
+        error_msg = parseString(xml).getElementsByTagName('Response')[0].getElementsByTagName('Errors')[0].getElementsByTagName('Error')[0]
+        print
+        sys.stderr.write('AWS Error: {0}\n'.format(quick_summary))
+        sys.stderr.write('{0}: {1}\n'.format(error_msg.getElementsByTagName('Code')[0].firstChild.data, error_msg.getElementsByTagName('Message')[0].firstChild.data))
+        print
+    except:
+        # Raise the exception if parsing failed
+        raise
+    sys.exit(1)
+
 
 
 def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, image, tag, key_pair, instance_type, placement, pem_home, user_data=None, noprompts=False):
@@ -48,7 +65,10 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
     # Ensure PEM key is created
     try:
         print "Ensuring DataStax pem key exists on AWS..."
-        key = conn.get_all_key_pairs(keynames=[key_pair])[0]
+        try:
+            key = conn.get_all_key_pairs(keynames=[key_pair])[0]
+        except boto.exception.EC2ResponseError:
+            print_boto_error()
 
         print "Ensuring DataStax pem key exists on filesystem..."
         # Print a warning message if the pem file can't be found
@@ -130,13 +150,16 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
     try:
         # Create the EC2 cluster
         print 'Launching cluster...'
-        reservation = conn.run_instances(image, 
-                                         min_count=reservation_size, 
-                                         max_count=reservation_size, 
-                                         instance_type=instance_type, 
-                                         key_name=key_pair, 
-                                         placement=placement, 
-                                         security_groups=['DataStax'], user_data=user_data)
+        try:
+            reservation = conn.run_instances(image, 
+                                             min_count=reservation_size, 
+                                             max_count=reservation_size, 
+                                             instance_type=instance_type, 
+                                             key_name=key_pair, 
+                                             placement=placement, 
+                                             security_groups=['DataStax'], user_data=user_data)
+        except boto.exception.EC2ResponseError:
+            print_boto_error()
 
         # Sleep so Amazon recognizes the new instance
         print 'Waiting for cluster...'
@@ -173,7 +196,12 @@ def terminate_cluster(aws_access_key_id, aws_secret_access_key, search_term):
     # Grab all the infomation for clusters spawn by this tool that are still alive
     ds_reservations = {}
     conn = boto.connect_ec2(aws_access_key_id, aws_secret_access_key)
-    reservations = conn.get_all_instances()
+
+    try:
+        reservations = conn.get_all_instances()
+    except boto.exception.EC2ResponseError:
+        print_boto_error()
+
     for reservation in reservations:
         if 'Initializer' in reservation.instances[0].tags and reservation.instances[0].tags['Initializer'] == 'DataStax' and reservation.instances[0].update() == 'running':
             if not reservation.instances[0].tags['Name'] in ds_reservations and search_term.lower() in reservation.instances[0].tags['Name'].lower():

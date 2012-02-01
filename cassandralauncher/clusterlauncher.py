@@ -205,7 +205,7 @@ def main():
         version = common.choose("Choose your Operating System Version: ", clusterChoices[cloud][operating_system].keys())
 
         image = clusterChoices[cloud][operating_system][version]['Image']
-        tag = "{0} Time {4} {1} {2} Size {3}".format(config.get('Shared', 'handle'), operating_system, version, reservation_size, time.strftime("%m-%d-%y %H:%M", time.localtime())).replace(' ', '-').replace(':', '.')
+        tag = "{0} Time {4} {1} {2} Size {3}".format(config.get('Shared', 'handle'), operating_system, version, reservation_size, time.strftime("%m-%d-%y %H:%M", time.localtime())).replace(' ', '-').replace(':', '_').replace('.', '_')
 
         private_ips, public_ips = rax.create_cluster(config.get('Rax', 'rax_user'), config.get('Rax', 'rax_api_key'),
                                                   reservation_size, image, tag,
