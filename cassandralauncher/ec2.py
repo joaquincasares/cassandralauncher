@@ -65,10 +65,7 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
     # Ensure PEM key is created
     try:
         print "Ensuring DataStax pem key exists on AWS..."
-        try:
-            key = conn.get_all_key_pairs(keynames=[key_pair])[0]
-        except boto.exception.EC2ResponseError:
-            print_boto_error()
+        key = conn.get_all_key_pairs(keynames=[key_pair])[0]
 
         print "Ensuring DataStax pem key exists on filesystem..."
         # Print a warning message if the pem file can't be found
