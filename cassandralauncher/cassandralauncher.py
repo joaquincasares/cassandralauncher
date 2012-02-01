@@ -181,7 +181,8 @@ def install_opsc_agents(user):
     # Connection to the OpsCenter machine to be used later
     opsc_conn = create_ssh_cmd(user, public_ips[0])
 
-    print "Waiting for the agent tarball to be created..."
+    print "Waiting for the agent tarball to be created (This can take up to 4 minutes)..."
+    print "    If taking longer, ctrl-C and login to AMI to see error logs."
     while exe_ssh_cmd(opsc_conn, "ls /usr/share/opscenter/agent/opscenter-agent.tar.gz")[1]:
         # The agent tarball has yet to be created
         time.sleep(5)
@@ -277,7 +278,7 @@ options_tree = {
     },
     'username': {
         'Section': 'Cassandra',
-        'Prompt': 'Username',
+        'Prompt': 'DataStax Username',
         'Help': 'DataStax Username'
     },
     'password': {
@@ -394,7 +395,7 @@ def main():
     check_cascading_options('handle')
 
     # Prompt the user with any outstanding running clusters
-    ec2.terminate_cluster(check_cascading_options('aws_access_key_id'), check_cascading_options('aws_secret_access_key'), check_cascading_options('handle'))
+    ec2.terminate_cluster(check_cascading_options('aws_access_key_id'), check_cascading_options('aws_secret_access_key'), check_cascading_options('handle'), prompt_continuation=True)
 
     # Get basic information for both Community and Enterprise clusters
     clustername = check_cascading_options('clustername')

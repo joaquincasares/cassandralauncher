@@ -162,7 +162,7 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
             print_boto_error()
 
         # Sleep so Amazon recognizes the new instance
-        print 'Waiting for cluster...'
+        print 'Waiting for EC2 cluster to instantiate...'
         time.sleep(10)
         for instance in reservation.instances:
             while not instance.update() == 'running':
@@ -191,7 +191,7 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
 
     return [private_ips, public_ips, reservation]
 
-def terminate_cluster(aws_access_key_id, aws_secret_access_key, search_term):
+def terminate_cluster(aws_access_key_id, aws_secret_access_key, search_term, prompt_continuation=False):
 
     # Grab all the infomation for clusters spawn by this tool that are still alive
     ds_reservations = {}
@@ -215,7 +215,7 @@ def terminate_cluster(aws_access_key_id, aws_secret_access_key, search_term):
         return
 
     # Prompt for cluster to destroy
-    selection = common.choose("Choose the cluster to destroy:", ds_reservations.keys(), noneOption=True)
+    selection = common.choose("Choose the cluster to destroy (if you wish):", ds_reservations.keys(), noneOption=True)
 
     # Return if you do not with to kill a cluster
     if selection == 'None':
@@ -235,3 +235,8 @@ def terminate_cluster(aws_access_key_id, aws_secret_access_key, search_term):
 
     print "Termination command complete."
     print
+
+    if prompt_continuation:
+        if raw_input('Do you wish to launch another cluster? [Y/n] ').lower() == 'n':
+            sys.exit(0)
+        print
