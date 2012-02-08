@@ -395,6 +395,11 @@ def main():
     check_cascading_options('handle')
 
     # Prompt the user with any outstanding running clusters
+    if (check_cascading_options('aws_access_key_id')[0] == '"' or check_cascading_options('aws_secret_access_key')[0] == '"' or
+        check_cascading_options('aws_access_key_id')[0] == "'" or check_cascading_options('aws_secret_access_key')[0] == "'"):
+        sys.stderr.write("None of the configurations should be wrapped in quotes.\n")
+        sys.stderr.write("    EC2:aws_access_key_id or EC2:aws_secret_access_key appears to be.\n")
+        sys.exit(1)
     ec2.terminate_cluster(check_cascading_options('aws_access_key_id'), check_cascading_options('aws_secret_access_key'), check_cascading_options('handle'), prompt_continuation=True)
 
     # Get basic information for both Community and Enterprise clusters

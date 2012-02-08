@@ -162,10 +162,20 @@ def main():
             sys.stderr.write("Ensure {0} is appropriately set.\n".format(config.get('Internal', 'last_location')))
             sys.stderr.write("    'EC2:aws_access_key_id|aws_secret_access_key' are missing.\n")
             sys.exit(1)
+        if (config.get('EC2', 'aws_access_key_id')[0] == '"' or config.get('EC2', 'aws_secret_access_key')[0] == '"' or
+            config.get('EC2', 'aws_access_key_id')[0] == "'" or config.get('EC2', 'aws_secret_access_key')[0] == "'"):
+            sys.stderr.write("None of the configurations should be wrapped in quotes.\n")
+            sys.stderr.write("    EC2:aws_access_key_id or EC2:aws_secret_access_key appears to be.\n")
+            sys.exit(1)
     if cloud == 'Rackspace':
         if not config.get('Rax', 'rax_user') or not config.get('Rax', 'rax_api_key'):
             sys.stderr.write("Ensure {0} is appropriately set.\n".format(config.get('Internal', 'last_location')))
             sys.stderr.write("    'Rax:rax_user|rax_api_key' are missing.\n")
+            sys.exit(1)
+        if (config.get('Rax', 'rax_user')[0] == '"' or config.get('Rax', 'rax_api_key')[0] == '"' or
+            config.get('Rax', 'rax_user')[0] == "'" or config.get('Rax', 'rax_api_key')[0] == "'"):
+            sys.stderr.write("None of the configurations should be wrapped in quotes.\n")
+            sys.stderr.write("    Rax:rax_user or Rax:rax_api_key appears to be.\n")
             sys.exit(1)
 
     action = common.choose("Choose your Cloud Command: ", ['Create', 'Destroy'])
