@@ -178,41 +178,37 @@ def install_opsc_agents(user):
     # Authenticate and ring cluster with keyless SSH
     prime_connections(public_ips, user)
 
-    # Connection to the OpsCenter machine to be used later
-    opsc_conn = create_ssh_cmd(user, public_ips[0])
+    if check_cascading_options('installopscenter', optional=True) != 'False':
+        # Connection to the OpsCenter machine to be used later
+        opsc_conn = create_ssh_cmd(user, public_ips[0])
 
-    print "Waiting for the agent tarball to be created (This can take up to 4 minutes)..."
-    print "    If taking longer, ctrl-C and login to AMI to see error logs."
-    while exe_ssh_cmd(opsc_conn, "ls /usr/share/opscenter/agent/opscenter-agent.tar.gz")[1]:
-        # The agent tarball has yet to be created
-        time.sleep(5)
+        print "Waiting for the agent tarball to be created (This can take up to 4 minutes)..."
+        print "    If taking longer, ctrl-C and login to AMI to see error logs."
+        while exe_ssh_cmd(opsc_conn, "ls /usr/share/opscenter/agent/opscenter-agent.tar.gz")[1]:
+            # The agent tarball has yet to be created
+            time.sleep(5)
 
-    # Ensures the tarball is fully written before transferring
-    while True:
-        old_md5 = exe_ssh_cmd(opsc_conn, "md5sum /usr/share/opscenter/agent/opscenter-agent.tar.gz")[0]
-        time.sleep(2)
-        new_md5 = exe_ssh_cmd(opsc_conn, "md5sum /usr/share/opscenter/agent/opscenter-agent.tar.gz")[0]
+        # Ensures the tarball is fully written before transferring
+        while True:
+            old_md5 = exe_ssh_cmd(opsc_conn, "md5sum /usr/share/opscenter/agent/opscenter-agent.tar.gz")[0]
+            time.sleep(2)
+            new_md5 = exe_ssh_cmd(opsc_conn, "md5sum /usr/share/opscenter/agent/opscenter-agent.tar.gz")[0]
 
-        if old_md5 == new_md5:
-            break
+            if old_md5 == new_md5:
+                break
 
-    print "Installing OpsCenter Agents..."
-    for i, node in enumerate(public_ips):
-        node_conn = create_ssh_cmd(user, node)
+        print "Installing OpsCenter Agents..."
+        for i, node in enumerate(public_ips):
+            node_conn = create_ssh_cmd(user, node)
 
-        # Copying OpsCenter Agent tarball
-        exe_ssh_cmd(opsc_conn, "scp /usr/share/opscenter/agent/opscenter-agent.tar.gz %s:opscenter-agent.tar.gz" % node)
-        
-        # Untarring tarball
-        exe_ssh_cmd(node_conn, "sudo mv -f opscenter-agent.tar.gz /usr/share; cd /usr/share; sudo tar --overwrite -xzf opscenter-agent.tar.gz; sudo rm -f opscenter-agent.tar.gz")
+            # Copying OpsCenter Agent tarball
+            exe_ssh_cmd(opsc_conn, "scp /usr/share/opscenter/agent/opscenter-agent.tar.gz %s:opscenter-agent.tar.gz" % node)
 
-        # Starting installation of OpsCenter Agent
-        exe_ssh_cmd(node_conn, "cd /usr/share/opscenter-agent/; sudo nohup bin/install_agent.sh opscenter-agent.deb %s %s" % (private_ips[0], private_ips[i]), wait=False)
-    print
+            # Untarring tarball
+            exe_ssh_cmd(node_conn, "sudo mv -f opscenter-agent.tar.gz /usr/share; cd /usr/share; sudo tar --overwrite -xzf opscenter-agent.tar.gz; sudo rm -f opscenter-agent.tar.gz")
 
-    print 'Primed Connection Strings:'
-    for node in public_ips:
-        print '{0} -i {1} -o UserKnownHostsFile={2} {3}@{4}'.format(config.get('System', 'ssh'), PEM_FILE, HOST_FILE, user, node)
+            # Starting installation of OpsCenter Agent
+            exe_ssh_cmd(node_conn, "cd /usr/share/opscenter-agent/; sudo nohup bin/install_agent.sh opscenter-agent.deb %s %s" % (private_ips[0], private_ips[i]), wait=False)
     print
 
 #################################
@@ -276,6 +272,11 @@ options_tree = {
         'Prompt': 'Version:',
         'Help': 'Community | Enterprise'
     },
+    'installopscenter': {
+        'Section': 'Cassandra',
+        'Prompt': 'Install Opscenter',
+        'Help': 'True | False'
+    },
     'username': {
         'Section': 'Cassandra',
         'Prompt': 'DataStax Username',
@@ -338,7 +339,7 @@ def basic_option_checker(read_option, option, type_check, choices):
         else:
             return read_option
 
-def check_cascading_options(option, type_check=False, choices=False, password=False):
+def check_cascading_options(option, type_check=False, choices=False, password=False, optional=False):
     """Reads from the command line arguments, then configuration file, then prompts
     the user for program options."""
     section = options_tree[option]['Section']
@@ -350,10 +351,14 @@ def check_cascading_options(option, type_check=False, choices=False, password=Fa
         return read_option
 
     # Read from configfile
-    read_option = config.get(section, option)
-    read_option = basic_option_checker(read_option, option, type_check, choices)
-    if read_option != None:
-        return read_option
+    if config.has_option(section, option):
+        read_option = config.get(section, option)
+        read_option = basic_option_checker(read_option, option, type_check, choices)
+        if read_option != None:
+            return read_option
+
+    if optional:
+        return False
 
     # Exit(1) if you asked for --noprompts and didn't fill in all variables
     if cli_options['CLI_noprompts']:
@@ -444,6 +449,7 @@ def main():
         
             user_data += ' --cfsreplicationfactor %s' % (cfsreplicationfactor)
         print
+
     # Included for the experimental DemoService that requires demoservice.py to always be running
     demotime = -1
     if config.get('Cassandra', 'demo') == 'True':
@@ -451,6 +457,9 @@ def main():
         demotime = check_cascading_options('demotime', float)
         print "If the demo service is running, this cluster will live for %s hour(s)." % demotime
         print
+
+    if check_cascading_options('installopscenter', optional=True) == 'False':
+        user_data += ' --opscenter no'
 
     # DataStax AMI specific options and formatting
     image = 'ami-fd23ec94'
@@ -478,13 +487,20 @@ def main():
         print '{0} -i {1} {2}@{3}'.format(config.get('System', 'ssh'), PEM_FILE, user, publicIP)
     print
 
-    # Print OpsCenter url
-    print "OpsCenter Address:"
-    print "http://%s:8888" % public_ips[0]
-    print "Note: You must wait 60 seconds after Cassandra becomes active to access OpsCenter."
-    print
+    if check_cascading_options('installopscenter', optional=True) != 'False':
+        # Print OpsCenter url
+        print "OpsCenter Address:"
+        print "http://%s:8888" % public_ips[0]
+        print "Note: You must wait 60 seconds after Cassandra becomes active to access OpsCenter."
+        print
 
     install_opsc_agents(user)
+
+    print 'Primed Connection Strings:'
+    for node in public_ips:
+        print '{0} -i {1} -o UserKnownHostsFile={2} {3}@{4}'.format(config.get('System', 'ssh'), PEM_FILE, HOST_FILE, user, node)
+    print
+
     ec2.terminate_cluster(check_cascading_options('aws_access_key_id'), check_cascading_options('aws_secret_access_key'), check_cascading_options('handle'))
 
 def run():
