@@ -111,14 +111,18 @@ def create_keyless_ssh_ring(public_ips, user):
     """Create keyless SSH ring from primed servers"""
 
     print "Creating a keyless SSH ring..."
-    for node in public_ips:
-        node_conn = create_ssh_cmd(user, node)
 
-        scp_send(user, public_ips[0], PEM_FILE)
-        exe_ssh_cmd(node_conn, "mv %s .ssh/id_rsa; chmod 600 .ssh/id_rsa" % 'DataStaxLauncher.pem')
+    # Send files to EC2 once
+    kicker_conn = create_ssh_cmd(user, public_ips[0])
+    scp_send(user, public_ips[0], PEM_FILE)
+    scp_send(user, public_ips[0], HOST_FILE)
+    exe_ssh_cmd(kicker_conn, "mv %s .ssh/id_rsa; chmod 400 .ssh/id_rsa" % (KEY_PAIR + '.pem'))
+    exe_ssh_cmd(kicker_conn, "mv %s .ssh/known_hosts; chmod 600 .ssh/known_hosts" % 'ds_known_hosts')
 
-        scp_send(user, public_ips[0], HOST_FILE)
-        exe_ssh_cmd(node_conn, "mv %s .ssh/known_hosts; chmod 600 .ssh/known_hosts" % 'ds_known_hosts')
+    # Transfer files from kicker node to all other nodes
+    for node in public_ips[1:]:
+        exe_ssh_cmd(kicker_conn, "scp .ssh/id_rsa %s:.ssh/id_rsa" % node)
+        exe_ssh_cmd(kicker_conn, "scp .ssh/known_hosts %s:.ssh/known_hosts" % node)
 
 def prime_connections(public_ips, user):
     """Ask acceptance of RSA keys."""
