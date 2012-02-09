@@ -396,6 +396,9 @@ def check_cascading_options(option, type_check=False, choices=False, password=Fa
 def main():
     print "Welcome to DataStax' Cassandra Cluster Launcher!"
     print
+    print "The easiest way to get Apache Cassandra up and running in Amazon's EC2"
+    print "in under 5 minutes!"
+    print
 
     global cli_options
     cli_options = common.parse_cli_options(options_tree)

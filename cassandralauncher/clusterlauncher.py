@@ -149,6 +149,12 @@ def printConnections(user, private_ips, public_ips, pem_file=False):
     print
 
 def main():
+    print "Welcome to the Cluster Launcher!"
+    print
+    print "The easiest way to interface with Amazon's EC2 and Rackspace's CloudServers"
+    print "and produce a plain instance (or cluster) in under 5 minutes!"
+    print
+
     if not config.get('Shared', 'handle'):
         sys.stderr.write("Ensure {0} is appropriately set.\n".format(config.get('Internal', 'last_location')))
         sys.stderr.write("    'Shared:handle' is missing.\n")
