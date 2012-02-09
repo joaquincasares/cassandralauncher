@@ -23,6 +23,7 @@ def create_cluster(rax_user, rax_api_key, reservation_size, image, tag, flavor):
     cloudservers = CloudServers(rax_user, rax_api_key)
     servers = []
     print 'Launching cluster...'
+    start_time = time.time()
     for i in range(reservation_size):
         transfer_files = {
             '/root/.ssh/authorized_keys' : open(os.path.expanduser("~/.ssh/id_rsa.pub"), 'r')
@@ -45,6 +46,8 @@ def create_cluster(rax_user, rax_api_key, reservation_size, image, tag, flavor):
         while cloudservers.servers.get(server.id).status != "ACTIVE":
             time.sleep(3)
     print "Cluster booted successfully!"
+    print "    Elapsed Time: %s seconds" % (time.time() - start_time)
+    print
 
     # Print SSH commands
     public_ips = []

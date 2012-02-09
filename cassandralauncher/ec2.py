@@ -147,6 +147,7 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
     try:
         # Create the EC2 cluster
         print 'Launching cluster...'
+        start_time = time.time()
         try:
             reservation = conn.run_instances(image, 
                                              min_count=reservation_size, 
@@ -165,6 +166,7 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
             while not instance.update() == 'running':
                 time.sleep(3)
         print "Cluster booted successfully!"
+        print "    Elapsed Time: %s seconds" % (time.time() - start_time)
         print
 
         # Tag the instances in this reservation
