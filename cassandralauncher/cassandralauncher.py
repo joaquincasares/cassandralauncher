@@ -308,7 +308,7 @@ options_tree = {
     },
     'instance_type': {
         'Section': 'EC2',
-        'Prompt': 'EC2 Instance Size',
+        'Prompt': 'EC2 Instance Size:',
         'Help': 'm1.large | m1.xlarge | m2.xlarge | m2.2xlarge | m2.4xlarge'
     },
     'noprompts':{

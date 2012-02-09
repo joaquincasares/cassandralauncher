@@ -93,13 +93,14 @@ def typed_input(type_check, question=''):
     # Return the int
     return toReturn
 
-def choose(question, choices, noneOption=False):
+def choose(question, choices, noneOption=False, sort=True):
     """Like raw_input, but prompts options and reprompts until answer is valid."""
 
     print question
 
     # Sort dictionary keys
-    choices.sort()
+    if sort:
+        choices.sort()
 
     # Add an option for adding None to the list as 0
     if noneOption:

@@ -204,9 +204,13 @@ def main():
         user_data = raw_input("Enter EC2 user data: ")
         print
 
+        instance_type = config.get('EC2', 'instance_type')
+        if not instance_type:
+            instance_type = common.choose('Choose your Instance Size:', ['m1.large', 'm1.xlarge', 'm2.xlarge', 'm2.2xlarge', 'm2.4xlarge'])
+
         clusterinfo = ec2.create_cluster(config.get('EC2', 'aws_access_key_id'), config.get('EC2', 'aws_secret_access_key'),
                                         reservation_size, image, tag, KEY_PAIR,
-                                        config.get('EC2', 'instance_type'), config.get('EC2', 'placement'), PEM_HOME, user_data)
+                                        instance_type, config.get('EC2', 'placement'), PEM_HOME, user_data)
         private_ips, public_ips, reservation = clusterinfo
 
         printConnections(user, private_ips, public_ips, PEM_FILE)
@@ -217,9 +221,19 @@ def main():
         image = clusterChoices[cloud][operating_system][version]['Image']
         tag = "{0} Time {4} {1} {2} Size {3}".format(config.get('Shared', 'handle'), operating_system, version, reservation_size, time.strftime("%m-%d-%y %H:%M", time.localtime())).replace(' ', '-').replace(':', '_').replace('.', '_')
 
+        flavor_array = ['256', '512', '1GB', '2GB', '4GB', '8GB', '15.5GB', '30GB']
+        flavor_choice = config.get('Rax', 'flavor')
+        if not flavor_choice:
+            flavor_choice = common.choose("Choose your Instance Size: ", flavor_array, sort=False)
+
+        flavor_dict = {}
+        for i, flavor in enumerate(flavor_array):
+            flavor_dict[flavor] = i + 1
+            flavor_dict[str(i + 1)] = i + 1 # For backward compliance
+        flavor = flavor_dict[flavor_choice]
+
         private_ips, public_ips = rax.create_cluster(config.get('Rax', 'rax_user'), config.get('Rax', 'rax_api_key'),
-                                                  reservation_size, image, tag,
-                                                  config.get('Rax', 'flavor'))
+                                                  reservation_size, image, tag, flavor)
 
         printConnections(config.get('Rax', 'user'), private_ips, public_ips)
 
