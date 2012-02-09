@@ -13,11 +13,9 @@ Make sure `python-setuptools` and `python-pip` are installed, then run:
 
 ## Setup
 
-Run:
+Start the program once to copy the default `/etc/cassandralauncher/clusterlauncher.conf` to `~/.clusterlauncher.conf`.
 
-    cp /etc/cassandralauncher/clusterlauncher.conf ~/.clusterlauncher.conf
-
-Edit `~/.clusterlauncher.conf` with your authentication parameters.
+Exit the program and edit `~/.clusterlauncher.conf` with your appropriate authentication parameters.
 
 ## Cassandra Launcher
 
