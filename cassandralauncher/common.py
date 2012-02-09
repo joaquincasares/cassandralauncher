@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import shutil
 import sys
 
 from optparse import OptionParser
@@ -27,7 +28,9 @@ def header():
             configfile = os.path.join(os.path.expanduser('~'), '.clusterlauncher.conf')
         if not os.path.exists(configfile):
             # Look for the configuration file in /etc/clusterlauncher
-            configfile = os.path.join('/etc', 'cassandralauncher', 'clusterlauncher.conf')
+            defaultfile = os.path.join('/etc', 'cassandralauncher', 'clusterlauncher.conf')
+            configfile = os.path.join(os.path.expanduser('~'), '.clusterlauncher.conf')
+            shutil.copyfile(defaultfile, configfile)
         if not os.path.exists(configfile):
             # Exit since we still have not found the configuration file
             sys.stderr.write("Please setup your authentication configurations. Order of importance:\n")

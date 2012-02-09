@@ -394,10 +394,11 @@ def check_cascading_options(option, type_check=False, choices=False, password=Fa
 
 
 def main():
-    print "Welcome to DataStax' Cassandra Cluster Launcher!"
+    print "Using configuration file: %s" % config.get('Internal', 'last_location')
     print
-    print "The easiest way to get Apache Cassandra up and running in Amazon's EC2"
-    print "in under 5 minutes!"
+    print "Welcome to DataStax' Cassandra Cluster Launcher!"
+    print "    The easiest way to get Apache Cassandra up and running in Amazon's EC2"
+    print "    in under 5 minutes!"
     print
 
     global cli_options

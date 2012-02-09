@@ -149,10 +149,11 @@ def printConnections(user, private_ips, public_ips, pem_file=False):
     print
 
 def main():
-    print "Welcome to the Cluster Launcher!"
+    print "Using configuration file: %s" % config.get('Internal', 'last_location')
     print
-    print "The easiest way to interface with Amazon's EC2 and Rackspace's CloudServers"
-    print "and produce a plain instance (or cluster) in under 5 minutes!"
+    print "Welcome to the Cluster Launcher!"
+    print "    The easiest way to interface with Amazon's EC2 and Rackspace's CloudServers"
+    print "    and produce a plain instance (or cluster) in under 5 minutes!"
     print
 
     if not config.get('Shared', 'handle'):
