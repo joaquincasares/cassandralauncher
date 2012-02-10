@@ -31,6 +31,16 @@ def header():
             defaultfile = os.path.join('/etc', 'cassandralauncher', 'clusterlauncher.conf')
             configfile = os.path.join(os.path.expanduser('~'), '.clusterlauncher.conf')
             shutil.copyfile(defaultfile, configfile)
+
+            # Exit the program to alert the user that the conf file must be properly set with authentications
+            # before continuing
+            sys.stderr.write("A copy of the default configuration file located at:\n")
+            sys.stderr.write('    %s\n' % defaultfile)
+            sys.stderr.write("was now copied to:\n")
+            sys.stderr.write('    %s\n' % configfile)
+            sys.stderr.write("Please ensure that all default settings are correct and filled in before continuing.\n")
+            sys.exit(1)
+
         if not os.path.exists(configfile):
             # Exit since we still have not found the configuration file
             sys.stderr.write("Please setup your authentication configurations. Order of importance:\n")
