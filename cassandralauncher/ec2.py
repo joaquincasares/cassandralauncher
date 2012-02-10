@@ -161,12 +161,16 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
 
         # Sleep so Amazon recognizes the new instance
         print 'Waiting for EC2 cluster to instantiate...'
-        time.sleep(10)
-        for instance in reservation.instances:
+        time.sleep(15)
+        print '    Nodes that have been allocated by EC2:'
+        for i, instance in enumerate(reservation.instances):
             while not instance.update() == 'running':
                 time.sleep(3)
+            print '        Node %s' % (i)
+        print
+
         print "Cluster booted successfully!"
-        end_time = time.time() - start_time
+        end_time = int(time.time() - start_time)
         print '    Elapsed Time: %s minutes %s seconds' % (end_time / 60, end_time % 60)
         print
 

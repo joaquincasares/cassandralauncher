@@ -248,7 +248,7 @@ def run():
     try:
         start_time = time.time()
         main()
-        end_time = time.time() - start_time
+        end_time = int(time.time() - start_time)
         print 'Total Elapsed Time: %s minutes %s seconds' % (end_time / 60, end_time % 60)
     except KeyboardInterrupt:
         print

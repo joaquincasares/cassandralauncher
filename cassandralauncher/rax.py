@@ -42,11 +42,15 @@ def create_cluster(rax_user, rax_api_key, reservation_size, image, tag, flavor):
     
     print 'Waiting for cluster...'
     time.sleep(10)
-    for server in servers:
+    print '    Nodes that have been allocated by Rackspace:'
+    for i, server in enumerate(servers):
         while cloudservers.servers.get(server.id).status != "ACTIVE":
             time.sleep(3)
+        print '        Node %s' % (i)
+    print
+
     print "Cluster booted successfully!"
-    end_time = time.time() - start_time
+    end_time = int(time.time() - start_time)
     print '    Elapsed Time: %s minutes %s seconds' % (end_time / 60, end_time % 60)
     print
 
