@@ -46,7 +46,7 @@ def create_cluster(rax_user, rax_api_key, reservation_size, image, tag, flavor):
         while cloudservers.servers.get(server.id).status != "ACTIVE":
             time.sleep(3)
     print "Cluster booted successfully!"
-    print "    Elapsed Time: %s seconds" % (time.time() - start_time)
+    print "    Elapsed Time: %d seconds" % (time.time() - start_time)
     print
 
     # Print SSH commands

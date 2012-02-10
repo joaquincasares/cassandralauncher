@@ -166,20 +166,25 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
             while not instance.update() == 'running':
                 time.sleep(3)
         print "Cluster booted successfully!"
-        print "    Elapsed Time: %s seconds" % (time.time() - start_time)
+        print "    Elapsed Time: %d seconds" % (time.time() - start_time)
         print
 
         # Tag the instances in this reservation
         for instance in reservation.instances:
             conn.create_tags([instance.id], {'Name': tag, 'Initializer': 'DataStax'})
-    except:
+    except Exception, err:
         print "\n\nERROR: Tags were never applied to started instances!!! Make sure you TERMINATE instances here:"
         print "    https://console.aws.amazon.com/ec2/home?region=us-east-1#s=Instances\n"
         
         # Ensure the user acknowledges pricing danger
-        while raw_input('Acknowledge warning [Type OK]: ').lower() != 'ok':
-            pass
-        raise
+        while True:
+            try:
+                while raw_input('Acknowledge warning [Type OK]: ').lower() != 'ok':
+                    pass
+                raise err
+            except KeyboardInterrupt:
+                print
+                pass
 
     # Collect ip addresses
     private_ips = []
