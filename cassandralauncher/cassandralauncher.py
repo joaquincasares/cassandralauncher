@@ -394,6 +394,7 @@ def check_cascading_options(option, type_check=False, choices=False, password=Fa
 
 
 def main():
+    start_time = time.time()
     print "Using configuration file: %s" % config.get('Internal', 'last_location')
     print
     print "Welcome to DataStax' Cassandra Cluster Launcher!"
@@ -508,6 +509,9 @@ def main():
     for node in public_ips:
         print '{0} -i {1} -o UserKnownHostsFile={2} {3}@{4}'.format(config.get('System', 'ssh'), PEM_FILE, HOST_FILE, user, node)
     print
+
+    end_time = time.time() - start_time
+    print 'Total Elapsed Time: %s minutes %s seconds' % (end_time / 60, end_time % 60)
 
     ec2.terminate_cluster(check_cascading_options('aws_access_key_id'), check_cascading_options('aws_secret_access_key'), check_cascading_options('handle'))
 

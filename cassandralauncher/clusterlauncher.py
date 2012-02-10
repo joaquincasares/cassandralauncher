@@ -244,11 +244,12 @@ def main():
 
         printConnections(config.get('Rax', 'user'), private_ips, public_ips)
 
-
-
 def run():
     try:
+        start_time = time.time()
         main()
+        end_time = time.time() - start_time
+        print 'Total Elapsed Time: %s minutes %s seconds' % (end_time / 60, end_time % 60)
     except KeyboardInterrupt:
         print
         sys.stderr.write("Program Aborted.\n")
