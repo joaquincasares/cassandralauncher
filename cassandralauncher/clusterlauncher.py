@@ -144,7 +144,10 @@ def printConnections(user, private_ips, public_ips, pem_file=False):
     print
 
     # Print IPs (CSV)
+    print "Public IPs:"
     print ", ".join(public_ips)
+    print
+    print "Private IPs:"
     print ", ".join(private_ips)
     print
 
