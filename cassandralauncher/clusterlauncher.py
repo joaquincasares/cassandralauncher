@@ -71,7 +71,8 @@ clusterChoices = {
                     'AMI': 'ami-c40df0ad'
                 }
             }
-        }
+        },
+        '~Custom AMI':'Null'
     },
     'Rackspace': {
         'Ubuntu':{
@@ -203,13 +204,18 @@ def main():
     operating_system = common.choose("Choose your Testing Operating System: " , clusterChoices[cloud].keys())
 
     if cloud == 'EC2':
-        provider = common.choose("Choose your Image Provider: ", clusterChoices[cloud][operating_system].keys())
+        if operating_system == '~Custom AMI':
+            image = raw_input("Enter the AMI ID: ")
+            user = raw_input("Enter the AMI's default user: ")
+            tag = "{3} - Time: {2} {0} Size: {1}".format(image, reservation_size, time.strftime("%m-%d-%y %H:%M", time.localtime()), config.get('Shared', 'handle'))
+        else:
+            provider = common.choose("Choose your Image Provider: ", clusterChoices[cloud][operating_system].keys())
+            version = common.choose("Choose your Operating System Version: ", clusterChoices[cloud][operating_system][provider].keys())
 
-        version = common.choose("Choose your Operating System Version: ", clusterChoices[cloud][operating_system][provider].keys())
+            image = clusterChoices[cloud][operating_system][provider][version]['AMI']
+            user = clusterChoices[cloud][operating_system][provider][version]['User']
 
-        image = clusterChoices[cloud][operating_system][provider][version]['AMI']
-        user = clusterChoices[cloud][operating_system][provider][version]['User']
-        tag = "{5} - {0} Time: {4} {1} {2} Size: {3}".format(provider, operating_system, version, reservation_size, time.strftime("%m-%d-%y %H:%M", time.localtime()), config.get('Shared', 'handle'))
+            tag = "{5} - {0} Time: {4} {1} {2} Size: {3}".format(provider, operating_system, version, reservation_size, time.strftime("%m-%d-%y %H:%M", time.localtime()), config.get('Shared', 'handle'))
 
         user_data = raw_input("Enter EC2 user data: ")
         print
