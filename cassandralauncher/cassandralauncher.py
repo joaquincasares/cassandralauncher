@@ -171,8 +171,8 @@ def prime_connections(public_ips, user):
 #################################
 # Installing OpsCenter Agents
 
-def install_opsc_agents(user):
-    """Wait for OpsCenter agent tarball to be created. Then install the agent on all other nodes."""
+def start_priming(user):
+    """Prime connections to all nodes"""
 
     # Give AWS some time to warm up
     wait = 10
@@ -181,6 +181,10 @@ def install_opsc_agents(user):
 
     # Authenticate and ring cluster with keyless SSH
     prime_connections(public_ips, user)
+    print
+
+def install_opsc_agents(user):
+    """Wait for OpsCenter agent tarball to be created. Then install the agent on all other nodes."""
 
     if check_cascading_options('installopscenter', optional=True) != 'False':
         # Connection to the OpsCenter machine to be used later
@@ -491,12 +495,6 @@ def main():
     # Log clusterinfo
     running_log(reservation, demotime)
 
-    # Print SSH commands
-    print 'Unprimed Connection Strings:'
-    for publicIP in public_ips:
-        print '{0} -i {1} {2}@{3}'.format(config.get('System', 'ssh'), PEM_FILE, user, publicIP)
-    print
-
     if check_cascading_options('installopscenter', optional=True) != 'False':
         # Print OpsCenter url
         print "OpsCenter Address:"
@@ -504,12 +502,14 @@ def main():
         print "Note: You must wait 60 seconds after Cassandra becomes active to access OpsCenter."
         print
 
-    install_opsc_agents(user)
+    start_priming(user)
 
     print 'Primed Connection Strings:'
     for node in public_ips:
         print '{0} -i {1} -o UserKnownHostsFile={2} {3}@{4}'.format(config.get('System', 'ssh'), PEM_FILE, HOST_FILE, user, node)
     print
+
+    install_opsc_agents(user)
 
     end_time = int(time.time() - start_time)
     print 'Total Elapsed Time: %s minutes %s seconds' % (end_time / 60, end_time % 60)
