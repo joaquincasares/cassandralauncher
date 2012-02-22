@@ -20,7 +20,7 @@ Both run off of a config: clusterlauncher.conf.
 """
 
 setup(name='CassandraLauncher',
-      version='1.10-0',
+      version='1.11-1',
       description='Command line utilities for launching Cassandra clusters in EC2',
       long_description=long_description,
       author='Joaquin Casares',
@@ -29,7 +29,7 @@ setup(name='CassandraLauncher',
       packages=['cassandralauncher'],
       scripts=['scripts/cassandralauncher', 'scripts/clusterlauncher'],
       package_data={'': ['README.md']},
-      data_files=[('/etc/cassandralauncher', ['cassandralauncher/clusterlauncher.conf'])],
+      data_files=[('/etc/cassandralauncher', ['cassandralauncher/clusterlauncher.conf', 'cassandralauncher/datastax_ssh'])],
       keywords="apache cassandra datastax cluster clustertools cloud cloudservers rackspace ec2 aws on-demand",
       install_requires=["boto", "python-cloudservers"]
      )

@@ -89,6 +89,28 @@ def confirm_authentication(username, password):
 #################################
 
 #################################
+# Install datastax_ssh
+
+def install_datastax_ssh(user):
+    # Find the datastax_ssh original file
+    datastax_ssh = os.path.join(os.path.dirname(__file__), 'datastax_ssh')
+    if not os.path.exists(datastax_ssh):
+        datastax_ssh = os.path.join('/etc', 'cassandralauncher', 'datastax_ssh')
+
+    # Write the public IPs to the nodelist file
+    with tempfile.NamedTemporaryFile() as tmp_file:
+        tmp_file.write('\n'.join(public_ips))
+        tmp_file.flush()
+
+        # Send files to the cluster
+        for ip in public_ips:
+            scp_send(user, ip, tmp_file.name, 'nodelist')
+            scp_send(user, ip, datastax_ssh)
+            exe_ssh_cmd(create_ssh_cmd(user, ip), 'chmod +x datastax_ssh')
+
+#################################
+
+#################################
 # Keyless SSH Creation
 
 def sshprompt(prompt, choices):
@@ -550,6 +572,9 @@ def main():
     for node in public_ips:
         print '{0} -i {1} -o UserKnownHostsFile={2} {3}@{4}'.format(config.get('System', 'ssh'), PEM_FILE, HOST_FILE, user, node)
     print
+
+    print 'Installing DataStax SSH on the cluster...'
+    install_datastax_ssh(user)
 
     install_opsc_agents(user)
 
