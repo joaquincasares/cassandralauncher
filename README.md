@@ -62,6 +62,7 @@ present the option to kill a cluster these tools did not launch.
       [1] Enterprise
     1
 
+    Confirming credentials...
     Realtime (Non-Analytic) Nodes: 2
     CFS Replication Factor: 1
 

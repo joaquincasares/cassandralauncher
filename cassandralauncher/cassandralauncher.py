@@ -5,9 +5,10 @@ import os
 import re
 import shlex
 import subprocess
+import sys
 import tempfile
 import time
-import sys
+import urllib2
 
 import ec2
 import common
@@ -60,6 +61,30 @@ def scp_send(sshuser, host, sendfile, tolocation=''):
                 HOST_FILE,
                 sendfile, sshuser, host, tolocation
             ))
+
+#################################
+
+#################################
+# Keyless SSH Creation
+
+def confirm_authentication(username, password):
+    repo_url = "http://debian.datastax.com/enterprise"
+
+    # Configure HTTP authentication
+    password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+    password_mgr.add_password(None, repo_url, username, password)
+    handler = urllib2.HTTPBasicAuthHandler(password_mgr)
+    opener = urllib2.build_opener(handler)
+
+    # Try reading from the authenticated connection
+    try:
+        opener.open(repo_url)
+    except Exception as inst:
+        if "401" in str(inst):
+            # Authentication failed
+            return False
+        raise
+    return True
 
 #################################
 
@@ -305,6 +330,11 @@ options_tree = {
         'Prompt': 'CFS Replication Factor',
         'Help': 'CFS Replication Factor'
     },
+    'datastax_ami': {
+        'Section': 'Cassandra',
+        'Prompt': 'DataStax AMI ID',
+        'Help': 'DataStax AMI ID'
+    },
     'demotime': {
         'Section': 'Cassandra',
         'Prompt': 'Time (in hours) for the cluster to live',
@@ -435,9 +465,18 @@ def main():
     user_data = '--clustername %s --totalnodes %s --version %s' % (clustername, totalnodes, version)
 
     if version.lower() == 'Enterprise'.lower():
-        # Get additional information for Enterprise clusters
-        username = check_cascading_options('username')
-        password = check_cascading_options('password', password=True)
+        while True:
+            # Get additional information for Enterprise clusters
+            username = check_cascading_options('username')
+            password = check_cascading_options('password', password=True)
+
+            print "Confirming credentials..."
+            if confirm_authentication(username, password):
+                break
+            else:
+                config.set('Cassandra', 'username')
+                config.set('Cassandra', 'password')
+                print "Authentication to DataStax server failed. Please try again."
 
         # Check the number of Vanilla Cassandra nodes that will launch
         while True:
@@ -476,7 +515,10 @@ def main():
         user_data += ' --opscenter no'
 
     # DataStax AMI specific options and formatting
-    image = 'ami-fd23ec94'
+    image = check_cascading_options('datastax_ami', optional=True)
+    if not image:
+        image = 'ami-fd23ec94'
+
     tag = '{0} - DataStaxAMI Time: {1} Size: {2}'.format(check_cascading_options('handle'), time.strftime("%m-%d-%y %H:%M", time.localtime()), totalnodes)
     user = 'ubuntu'
 
