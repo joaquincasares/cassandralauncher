@@ -11,6 +11,10 @@ Make sure `python-setuptools` and `python-pip` are installed, then run:
 
     pip install cassandralauncher
 
+## Upgrading
+
+    pip install --upgrade cassandralauncher
+
 ## Setup
 
 Start the program once to copy the default `/etc/cassandralauncher/clusterlauncher.conf` to `~/.clusterlauncher.conf`.
