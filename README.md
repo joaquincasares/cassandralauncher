@@ -218,6 +218,6 @@ to display all options. `clusterlauncher` does not have this functionality, but 
 
 My cluster is not done launching one (or several) of my nodes. What did I do wrong?
 
-    Nothing. EC2 does this from time to time. You can either continue on to do basic testing,
-    or terminate this cluster and try again. Using EC2 off it's peak hours helps in this
-    scenario.
+    Nothing. EC2 and Rackspace do this from time to time. You can either continue on to do
+    basic testing, or terminate this cluster and try again. Using EC2 and Rackspace off it's
+    peak hours helps in this scenario, in general.
