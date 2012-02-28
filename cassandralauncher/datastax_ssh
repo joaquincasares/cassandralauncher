@@ -1,0 +1,97 @@
+#!/usr/bin/env python
+### Script provided by DataStax.
+
+import os
+import subprocess
+import shlex
+import sys
+
+
+commands = [
+    'Enter a custom command...',
+    'nodetool -h localhost ring',
+    'sudo tail /var/log/cassandra/output.log',
+    'sudo tail /var/log/cassandra/system.log',
+    'sudo /etc/init.d/cassandra start',
+    'sudo /etc/init.d/cassandra stop',
+    'sudo /etc/init.d/cassandra restart'
+]
+
+# Function to execute commands and print traces of the command and output for debugging/logging purposes
+def exe(command, log=True):
+    # Executes command and wait for completion
+    process = subprocess.Popen(shlex.split(command), stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    read = process.communicate()
+    
+    # Prints output to stdout
+    print read[0]
+    print read[1]
+    
+    # return process
+    return read
+
+# SSH function that returns SSH string
+def create_ssh_cmd(host, sshuser):
+    return "ssh -t %s@%s " % (sshuser, host)
+
+# SSH function that executes SSH string + command
+def exe_ssh_cmd(connstring, command, printmsg=False):
+    exe_command = '%s "%s"' % (connstring, command)
+    output = exe(exe_command)
+    if printmsg and output[1]:
+        print 
+        print printmsg
+        print "Command that failed:"
+        print '    %s' % (exe_command)
+        print "Error:"
+        print output[1]
+    return output
+
+def datastax_ssh(command):
+    current_path = ''
+    if os.path.dirname(sys.argv[0]):
+        current_path = os.path.dirname(sys.argv[0])
+
+    with open(os.path.join(current_path, 'nodelist'), 'r') as f:
+        nodelist = f.readlines()
+
+    sshuser = 'ubuntu'
+
+    for ip in nodelist:
+        if ip.strip():
+            sshcommand = create_ssh_cmd(ip, sshuser)
+
+            print "Performing '%s' on %s..." % (command, ip.strip())
+            exe_ssh_cmd(sshcommand, command)
+
+try:
+    print "Welcome to DataStax' SSH Utility!"
+    print
+
+    selection = False
+    while not selection:
+        print "Choose a command to run across the cluster:"
+        for i, command in enumerate(commands):
+            print "    %s. %s" % (i, command)
+
+        try:
+            selection = int(raw_input(""))
+            print
+
+            if selection == 0:
+                selection = raw_input("Please input your command: ")
+                print
+            else:
+                selection = commands[selection]
+        except KeyboardInterrupt:
+            raise
+        except:
+            print "Invalid selection. Please try again."
+            print
+            selection = False
+
+    datastax_ssh(selection)
+# Catch, log, and display pretty KeyboardInterrupts
+except KeyboardInterrupt:
+    print
+    pass

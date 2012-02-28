@@ -7,6 +7,8 @@ This project has two offerings. They are:
 
 ## Installation
 
+**Note:** This repository does not need to be cloned. Everything is already included in the pip commands.
+
 Make sure `python-setuptools` and `python-pip` are installed, then run:
 
     pip install cassandralauncher
