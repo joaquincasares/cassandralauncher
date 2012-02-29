@@ -50,7 +50,7 @@ def create_ssh_cmd(sshuser, host):
 def exe_ssh_cmd(connstring, command, wait=True):
     """SSH function that executes SSH string + command"""
 
-    return exe(connstring + ' "' + command + '"', wait)
+    return exe('{0} "{1}"'.format(connstring, command), wait)
 
 def scp_send(sshuser, host, sendfile, tolocation=''):
     """SCP send a file"""
@@ -89,7 +89,7 @@ def confirm_authentication(username, password):
 #################################
 
 #################################
-# Install datastax_ssh
+# Install small tools
 
 def install_datastax_ssh(user):
     # Find the datastax_ssh original file
@@ -107,6 +107,21 @@ def install_datastax_ssh(user):
             scp_send(user, ip, tmp_file.name, 'nodelist')
             scp_send(user, ip, datastax_ssh)
             exe_ssh_cmd(create_ssh_cmd(user, ip), 'chmod +x datastax_ssh')
+
+def install_hosts_appending(user):
+    # Write the public IPs to the nodelist file
+    with tempfile.NamedTemporaryFile() as tmp_file:
+        hosts_file = ''
+        for i, ip in enumerate(private_ips):
+            hosts_file += '{0:15} {1}\n'.format(ip, 'node{0}'.format(i))
+        tmp_file.write(hosts_file)
+        tmp_file.flush()
+
+        # Send files to the cluster
+        for ip in public_ips:
+            scp_send(user, ip, tmp_file.name, 'hosts_file')
+            exe_ssh_cmd(create_ssh_cmd(user, ip), "sudo su -c 'cat hosts_file >> /etc/hosts'")
+            exe_ssh_cmd(create_ssh_cmd(user, ip), 'rm hosts_file')
 
 #################################
 
@@ -575,6 +590,9 @@ def main():
 
     print 'Installing DataStax SSH on the cluster...'
     install_datastax_ssh(user)
+
+    print 'Setting up the hosts file for the cluster...'
+    install_hosts_appending(user)
 
     install_opsc_agents(user)
 
