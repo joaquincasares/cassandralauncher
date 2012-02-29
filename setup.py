@@ -14,20 +14,20 @@ except:
 long_description = """CassandraLauncher contains two parts:
 
 1. `cassandralauncher` is accessible straight from the command line and launches a Cassandra cluster for you.
-2. `clusterlauncher` is also accessible from the command line and provides a user interface for AWS and RAX.
+2. `imagelauncher` is also accessible from the command line and provides a user interface for AWS and RAX.
 
 Both run off of a config: clusterlauncher.conf.
 """
 
 setup(name='CassandraLauncher',
-      version='1.12-0',
+      version='1.13-0',
       description='Command line utilities for launching Cassandra clusters in EC2',
       long_description=long_description,
       author='Joaquin Casares',
       author_email='joaquin.casares AT gmail.com',
       url='http://www.github.com/joaquincasares/cassandralauncher',
       packages=['cassandralauncher'],
-      scripts=['scripts/cassandralauncher', 'scripts/clusterlauncher'],
+      scripts=['scripts/cassandralauncher', 'scripts/imagelauncher'],
       package_data={'': ['README.md']},
       data_files=[('/etc/cassandralauncher', ['cassandralauncher/clusterlauncher.conf', 'cassandralauncher/datastax_ssh'])],
       keywords="apache cassandra datastax cluster clustertools cloud cloudservers rackspace ec2 aws on-demand",

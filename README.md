@@ -1,9 +1,9 @@
-# Cassandra Launcher (and Cluster Launcher)
+# Cassandra Launcher (and Plain Image Launcher)
 
 This project has two offerings. They are:
 
 1. Cassandra Launcher - An easy to use, interactive command line interface that allows you to deterministically launch a DataStax Community or DataStax Enterprise cluster in under a minute. This component also comes with a fully scriptable interface for cluster launches straight from the command line.
-2. Cluster Launcher - A great tool that combines both Amazon's EC2 and Rackspace's Cloudservers into a single tool that allows for deterministicly easy clustering, keyless ssh, and interactive prompts for choosing your environment. No longer must you search for images IDs or wait past page reloads for a cluster since this is all done on the client side.
+2. Plain Image Launcher - A great tool that combines both Amazon's EC2 and Rackspace's Cloudservers into a single tool that allows for deterministicly easy clustering, keyless ssh, and interactive prompts for choosing your environment. No longer must you search for images IDs or wait past page reloads for a cluster since this is all done on the client side.
 
 ## Installation
 
@@ -27,19 +27,19 @@ Exit the program and edit `~/.clusterlauncher.conf` with your appropriate authen
 
     cassandralauncher
 
-## EC2/RAX Plain Cluster Launcher
+## EC2/RAX Plain Image Launcher
 
-    clusterlauncher
+    imagelauncher
 
 ## To destroy
     
-Either run `cassandralauncher` or `clusterlauncher` again.
+Either run `cassandralauncher` or `imagelauncher` again.
 
 * With `cassandralauncher`:
 
     * Select Cluster, Confirm.
 
-* With `clusterlauncher`:
+* With `imagelauncher`:
 
     * Select EC2 or RAX, Destroy, Cluster, Confirm.
 
@@ -123,12 +123,12 @@ present the option to kill a cluster these tools did not launch.
 
     Termination command complete.
 
-## Sample Run for Cluster Launcher
+## Sample Run for Plain Image Launcher
 
-    host1:~ joaquin$ clusterlauncher
+    host1:~ joaquin$ imagelauncher
     Using configuration file: /root/.clusterlauncher.conf
 
-    Welcome to the Cluster Launcher!
+    Welcome to the Plain Image Launcher!
         The easiest way to interface with Amazon's EC2 and Rackspace's CloudServers
         and produce a plain instance (or cluster) in under 5 minutes!
 
@@ -184,10 +184,10 @@ present the option to kill a cluster these tools did not launch.
 
 
 
-    host1:~ joaquin$ clusterlauncher
+    host1:~ joaquin$ imagelauncher
     Using configuration file: /root/.clusterlauncher.conf
 
-    Welcome to the Cluster Launcher!
+    Welcome to the Plain Image Launcher!
         The easiest way to interface with Amazon's EC2 and Rackspace's CloudServers
         and produce a plain instance (or cluster) in under 5 minutes!
 
@@ -216,7 +216,7 @@ Run:
 
     cassandralauncher -h
 
-to display all options. `clusterlauncher` does not have this functionality, but is easily scriptable at the Python level calling ec2.py or rax.py. See `clusterlauncher.py` for how to do this.
+to display all options. `imagelauncher` does not have this functionality, but is easily scriptable at the Python level calling ec2.py or rax.py. See `clusterlauncher.py` for how to do this.
 
 ## FAQ
 

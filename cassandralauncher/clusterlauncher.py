@@ -155,7 +155,7 @@ def printConnections(user, private_ips, public_ips, pem_file=False):
 def main():
     print "Using configuration file: %s" % config.get('Internal', 'last_location')
     print
-    print "Welcome to the Cluster Launcher!"
+    print "Welcome to the Plain Image Launcher!"
     print "    The easiest way to interface with Amazon's EC2 and Rackspace's CloudServers"
     print "    and produce a plain instance (or cluster) in under 5 minutes!"
     print
