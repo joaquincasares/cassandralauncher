@@ -490,7 +490,11 @@ def main():
 
     # Get basic information for both Community and Enterprise clusters
     clustername = check_cascading_options('clustername')
-    clustername = clustername.replace("'", "").replace(' ', '') # AMI 2.2 will allow spaces
+    if True:
+        clustername = clustername.replace("'", "").replace(' ', '')
+    else:
+        # AMI 2.2 allows spaces
+        clustername = "'%s'" % clustername.replace("'", "")
 
     # Ensure totalnodes > 0
     while True:
