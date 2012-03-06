@@ -106,10 +106,10 @@ def install_datastax_ssh(user):
         for ip in public_ips:
             scp_send(user, ip, tmp_file.name, 'nodelist')
             scp_send(user, ip, datastax_ssh)
-            exe_ssh_cmd(create_ssh_cmd(user, ip), 'chmod +x datastax_ssh')
+            exe_ssh_cmd(create_ssh_cmd(user, ip), 'chmod +x datastax_ssh; sudo mv datastax_ssh /usr/bin/datastax_ssh; sudo mkdir /etc/cassandralauncher; sudo mv nodelist /etc/cassandralauncher/nodelist')
 
 def install_hosts_appending(user):
-    # Write the public IPs to the nodelist file
+    # Write the public IPs to a hosts file
     with tempfile.NamedTemporaryFile() as tmp_file:
         hosts_file = ''
         for i, ip in enumerate(private_ips):
@@ -414,16 +414,17 @@ def basic_option_checker(read_option, option, type_check, choices):
         else:
             return read_option
 
-def check_cascading_options(option, type_check=False, choices=False, password=False, optional=False):
+def check_cascading_options(option, type_check=False, choices=False, password=False, optional=False, ignore_command_line=False):
     """Reads from the command line arguments, then configuration file, then prompts
     the user for program options."""
     section = options_tree[option]['Section']
 
     # Read from sys.argv
-    read_option = cli_options['{0}_{1}'.format(section, option)]
-    read_option = basic_option_checker(read_option, option, type_check, choices)
-    if read_option != None:
-        return read_option
+    if not ignore_command_line:
+        read_option = cli_options['{0}_{1}'.format(section, option)]
+        read_option = basic_option_checker(read_option, option, type_check, choices)
+        if read_option != None:
+            return read_option
 
     # Read from configfile
     if config.has_option(section, option):
@@ -438,7 +439,7 @@ def check_cascading_options(option, type_check=False, choices=False, password=Fa
     # Exit(1) if you asked for --noprompts and didn't fill in all variables
     if cli_options['CLI_noprompts']:
         sys.stderr.write('Prompt occurred after specifying --noprompts.\n')
-        sys.stderr.write('Missing configuration for "--{0}".\n'.format(option))
+        sys.stderr.write('Missing/Invalid configuration for "--{0}".\n'.format(option))
         sys.exit(1)
 
     # Prompt for password if special case
@@ -497,19 +498,24 @@ def main():
         clustername = "'%s'" % clustername.replace("'", "")
 
     # Ensure totalnodes > 0
+    ignore_command_line = False
     while True:
-        totalnodes = check_cascading_options('totalnodes', int)
+        totalnodes = check_cascading_options('totalnodes', int, ignore_command_line=ignore_command_line)
         if totalnodes > 0:
             break
+        else:
+            config.set('Cassandra', 'totalnodes')
+            ignore_command_line = True
     
     version = check_cascading_options('version', choices=['Community', 'Enterprise'])
     user_data = '--clustername %s --totalnodes %s --version %s' % (clustername, totalnodes, version)
 
     if version.lower() == 'Enterprise'.lower():
+        ignore_command_line = False
         while True:
             # Get additional information for Enterprise clusters
-            username = check_cascading_options('username')
-            password = check_cascading_options('password', password=True)
+            username = check_cascading_options('username', ignore_command_line=ignore_command_line)
+            password = check_cascading_options('password', password=True, ignore_command_line=ignore_command_line)
 
             print "Confirming credentials..."
             if confirm_authentication(username, password):
@@ -517,29 +523,34 @@ def main():
             else:
                 config.set('Cassandra', 'username')
                 config.set('Cassandra', 'password')
+                ignore_command_line = True
                 print "Authentication to DataStax server failed. Please try again."
 
         # Check the number of Vanilla Cassandra nodes that will launch
+        ignore_command_line = False
         while True:
-            realtimenodes = check_cascading_options('realtimenodes', int)
+            realtimenodes = check_cascading_options('realtimenodes', int, ignore_command_line=ignore_command_line)
             if realtimenodes <= totalnodes:
                 break
             else:
                 # Clear the previous cfsreplicationfactor
                 config.set('Cassandra', 'realtimenodes')
+                ignore_command_line = True
         
         user_data += ' --username %s --password %s --realtimenodes %s' % (username, password, realtimenodes)
 
         # If Hadoop enabled nodes are launching, check the CFS replication factor
         analyticnodes = totalnodes - realtimenodes
         if analyticnodes > 0:
+            ignore_command_line = False
             while True:
-                cfsreplicationfactor = check_cascading_options('cfsreplicationfactor', int)
+                cfsreplicationfactor = check_cascading_options('cfsreplicationfactor', int, ignore_command_line=ignore_command_line)
                 if cfsreplicationfactor >= 1 and cfsreplicationfactor <= analyticnodes:
                     break
                 else:
                     # Clear the previous cfsreplicationfactor
                     config.set('Cassandra', 'cfsreplicationfactor')
+                    ignore_command_line = True
         
             user_data += ' --cfsreplicationfactor %s' % (cfsreplicationfactor)
         print

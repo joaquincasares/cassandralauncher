@@ -52,7 +52,7 @@ def datastax_ssh(command):
     if os.path.dirname(sys.argv[0]):
         current_path = os.path.dirname(sys.argv[0])
 
-    with open(os.path.join(current_path, 'nodelist'), 'r') as f:
+    with open(os.path.join(current_path, '/etc/cassandralauncher/nodelist'), 'r') as f:
         nodelist = f.readlines()
 
     sshuser = 'ubuntu'
