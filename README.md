@@ -53,8 +53,8 @@ present the option to kill a cluster these tools did not launch.
 
 ## More Documentation
 
-[Sample Runs](docs/sample_runs.md)
-[New Features](docs/new_features.md)
+* [Sample Runs](tree/master/docs/sample_runs.md)
+* [New Features](tree/master/docs/new_features.md)
 
 ## Programmatically Launching Cassandra Clusters
 
