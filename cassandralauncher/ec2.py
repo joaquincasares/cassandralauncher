@@ -60,7 +60,8 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
 
     # Connect to EC2
     print 'Starting an EC2 cluster of type {0} with image {1}...'.format(instance_type, image)
-    conn = boto.connect_ec2(aws_access_key_id, aws_secret_access_key)
+    conn = boto.ec2.connect_to_region(placement[:-1], aws_access_key_id=aws_access_key_id,
+                                      aws_secret_access_key=aws_secret_access_key)
 
     # Ensure PEM key is created
     try:
