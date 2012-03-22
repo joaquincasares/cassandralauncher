@@ -108,6 +108,19 @@ def install_datastax_ssh(user):
             scp_send(user, ip, datastax_ssh)
             exe_ssh_cmd(create_ssh_cmd(user, ip), 'chmod +x datastax_ssh; sudo mv datastax_ssh /usr/bin/datastax_ssh; sudo mkdir /etc/cassandralauncher; sudo mv nodelist /etc/cassandralauncher/nodelist')
 
+def upload_smoke_tests(user):
+    # Find the datastax_ssh original file
+    qa_file = os.path.join(os.path.dirname(__file__), '../', 'qa', 'run_packaging_smoke.sh')
+    if not os.path.exists(qa_file):
+        return
+
+    # Send files to the cluster
+    for ip in public_ips:
+        scp_send(user, ip, qa_file, 'run_packaging_smoke.sh')
+        exe_ssh_cmd(create_ssh_cmd(user, ip), 'chmod +x run_packaging_smoke.sh')
+        # exe_ssh_cmd(create_ssh_cmd(user, ip), 'sudo ./run_packaging_smoke.sh hadoop pkg')
+        # exe_ssh_cmd(create_ssh_cmd(user, ip), 'sudo ./run_packaging_smoke.sh search pkg')
+
 def install_hosts_appending(user):
     # Write the public IPs to a hosts file
     with tempfile.NamedTemporaryFile() as tmp_file:
@@ -397,6 +410,12 @@ options_tree = {
         'Prompt': 'NoPrompts',
         'Action': 'store_true',
         'Help': 'Ensures that no user prompts will occur.'
+    },
+    'qa':{
+        'Section': 'CLI',
+        'Prompt': 'QA',
+        'Action': 'store_true',
+        'Help': 'Upload QA scripts.'
     }
 }
 
@@ -501,11 +520,7 @@ def main():
 
     # Get basic information for both Community and Enterprise clusters
     clustername = check_cascading_options('clustername')
-    if True:
-        clustername = clustername.replace("'", "").replace(' ', '')
-    else:
-        # AMI 2.2 allows spaces
-        clustername = "'%s'" % clustername.replace("'", "")
+    clustername = "'%s'" % clustername.replace("'", "")
 
     # Ensure totalnodes > 0
     ignore_command_line = False
@@ -631,6 +646,10 @@ def main():
 
     print 'Installing DataStax SSH on the cluster...'
     install_datastax_ssh(user)
+
+    if cli_options['CLI_qa']:
+        print 'Uploading smoke tests on the cluster...'
+        upload_smoke_tests(user)
 
     print 'Setting up the hosts file for the cluster...'
     install_hosts_appending(user)
