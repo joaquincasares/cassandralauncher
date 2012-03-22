@@ -485,7 +485,7 @@ def main():
         sys.stderr.write("None of the configurations should be wrapped in quotes.\n")
         sys.stderr.write("    EC2:aws_access_key_id or EC2:aws_secret_access_key appears to be.\n")
         sys.exit(1)
-    ec2.terminate_cluster(check_cascading_options('aws_access_key_id'), check_cascading_options('aws_secret_access_key'), check_cascading_options('handle'), prompt_continuation=True)
+    ec2.terminate_cluster(check_cascading_options('aws_access_key_id'), check_cascading_options('aws_secret_access_key'), config.get('EC2', 'placement'), check_cascading_options('handle'), prompt_continuation=True)
 
     start_time = time.time()
 
@@ -615,7 +615,7 @@ def main():
     print 'Total Elapsed Time: %s minutes %s seconds' % (end_time / 60, end_time % 60)
     print
 
-    ec2.terminate_cluster(check_cascading_options('aws_access_key_id'), check_cascading_options('aws_secret_access_key'), check_cascading_options('handle'))
+    ec2.terminate_cluster(check_cascading_options('aws_access_key_id'), check_cascading_options('aws_secret_access_key'), config.get('EC2', 'placement'), check_cascading_options('handle'))
 
 def run():
     try:

@@ -7,6 +7,7 @@ import time
 
 try:
     import boto
+    import boto.ec2
 except:
     sys.stderr.write("'boto' is not installed on your system. Please run:\n")
     sys.stderr.write("    pip install boto\n")
@@ -201,11 +202,12 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
 
     return [private_ips, public_ips, reservation]
 
-def terminate_cluster(aws_access_key_id, aws_secret_access_key, search_term, prompt_continuation=False):
+def terminate_cluster(aws_access_key_id, aws_secret_access_key, placement, search_term, prompt_continuation=False):
 
     # Grab all the infomation for clusters spawn by this tool that are still alive
     ds_reservations = {}
-    conn = boto.connect_ec2(aws_access_key_id, aws_secret_access_key)
+    conn = boto.ec2.connect_to_region(placement[:-1], aws_access_key_id=aws_access_key_id,
+                                      aws_secret_access_key=aws_secret_access_key)
 
     try:
         reservations = conn.get_all_instances()
