@@ -587,7 +587,7 @@ def main():
         print
 
     if check_cascading_options('installopscenter', optional=True) == 'False':
-        user_data += ' --opscenter'
+        user_data += ' --opscenter no'
 
     if check_cascading_options('release', optional=True):
         user_data += ' --release %s' % check_cascading_options('release')
