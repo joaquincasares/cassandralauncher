@@ -347,6 +347,11 @@ options_tree = {
         'Prompt': 'Install Opscenter',
         'Help': 'True | False'
     },
+    'release': {
+        'Section': 'Cassandra',
+        'Prompt': 'Specify Package Release',
+        'Help': 'Package Release'
+    },
     'username': {
         'Section': 'Cassandra',
         'Prompt': 'DataStax Username',
@@ -357,10 +362,15 @@ options_tree = {
         'Prompt': 'Uses getpass()',
         'Help': 'DataStax Password'
     },
-    'realtimenodes': {
+    'analyticsnodes': {
         'Section': 'Cassandra',
-        'Prompt': 'Realtime (Non-Analytic) Nodes',
-        'Help': 'Number of Vanilla Cassandra Nodes'
+        'Prompt': 'Analytics Nodes',
+        'Help': 'Number of Analytics Nodes'
+    },
+    'searchnodes': {
+        'Section': 'Cassandra',
+        'Prompt': 'Search Nodes',
+        'Help': 'Number of Search Nodes'
     },
     'cfsreplicationfactor': {
         'Section': 'Cassandra',
@@ -526,28 +536,41 @@ def main():
                 ignore_command_line = True
                 print "Authentication to DataStax server failed. Please try again."
 
-        # Check the number of Vanilla Cassandra nodes that will launch
+        # Check the number of Analytics Nodes that will launch
         ignore_command_line = False
         while True:
-            realtimenodes = check_cascading_options('realtimenodes', int, ignore_command_line=ignore_command_line)
-            if realtimenodes <= totalnodes:
+            analyticsnodes = check_cascading_options('analyticsnodes', int, ignore_command_line=ignore_command_line)
+            if analyticsnodes <= totalnodes:
                 break
             else:
+                print "Overallocation of the chosen %d nodes" % (totalnodes)
                 # Clear the previous cfsreplicationfactor
-                config.set('Cassandra', 'realtimenodes')
+                config.set('Cassandra', 'analyticsnodes')
                 ignore_command_line = True
         
-        user_data += ' --username %s --password %s --realtimenodes %s' % (username, password, realtimenodes)
+        # Check the number of Search Nodes that will launch
+        ignore_command_line = False
+        while True:
+            searchnodes = check_cascading_options('searchnodes', int, ignore_command_line=ignore_command_line)
+            if analyticsnodes + searchnodes <= totalnodes:
+                break
+            else:
+                print "Overallocation of the chosen %d nodes" % (totalnodes)
+                # Clear the previous cfsreplicationfactor
+                config.set('Cassandra', 'searchnodes')
+                ignore_command_line = True
+
+        user_data += ' --username %s --password %s --analyticsnodes %s --searchnodes %s' % (username, password, analyticsnodes, searchnodes)
 
         # If Hadoop enabled nodes are launching, check the CFS replication factor
-        analyticnodes = totalnodes - realtimenodes
-        if analyticnodes > 0:
+        if analyticsnodes > 0:
             ignore_command_line = False
             while True:
                 cfsreplicationfactor = check_cascading_options('cfsreplicationfactor', int, ignore_command_line=ignore_command_line)
-                if cfsreplicationfactor >= 1 and cfsreplicationfactor <= analyticnodes:
+                if 1 <= cfsreplicationfactor and cfsreplicationfactor <= analyticsnodes:
                     break
                 else:
+                    print "1 <= CFS Replication Factor <= Number of Analytics Nodes"
                     # Clear the previous cfsreplicationfactor
                     config.set('Cassandra', 'cfsreplicationfactor')
                     ignore_command_line = True
@@ -564,7 +587,10 @@ def main():
         print
 
     if check_cascading_options('installopscenter', optional=True) == 'False':
-        user_data += ' --opscenter no'
+        user_data += ' --opscenter'
+
+    if check_cascading_options('release', optional=True):
+        user_data += ' --release %s' % check_cascading_options('release')
 
     # DataStax AMI specific options and formatting
     image = check_cascading_options('datastax_ami', optional=True)
