@@ -40,8 +40,8 @@ def create_ssh_cmd(sshuser, host):
     """SSH function that returns SSH string"""
 
     connstring = "%s -i %s -o UserKnownHostsFile=%s %s@%s " % (
-                        config.get('System', 'ssh'), 
-                        PEM_FILE, 
+                        config.get('System', 'ssh'),
+                        PEM_FILE,
                         HOST_FILE,
                         sshuser, host
                     )
@@ -126,7 +126,11 @@ def install_hosts_appending(user):
     with tempfile.NamedTemporaryFile() as tmp_file:
         hosts_file = ''
         for i, ip in enumerate(private_ips):
-            hosts_file += '{0:15} {1}\n'.format(ip, 'node{0}'.format(i))
+            for node_type in node_types:
+                if i in node_types[node_type]:
+                    i = node_types[node_type].index(i)
+                    break
+            hosts_file += '{0:15} {1}\n'.format(ip, '{0}{1}'.format(node_type, i))
         tmp_file.write(hosts_file)
         tmp_file.flush()
 
@@ -230,7 +234,7 @@ def prime_connections(public_ips, user):
         # If performing individual authentication, prompt
         if accept_rsa_fingerprints != 'all':
             accept_rsa_fingerprints = prompt_rsa_fingerprints(ip, fingerprint)
-        
+
         # Append all public RSA keys into HOST_FILE
         with open(HOST_FILE, 'a') as f:
             f.write(rsa_key)
@@ -533,11 +537,11 @@ def main():
         else:
             config.set('Cassandra', 'totalnodes')
             ignore_command_line = True
-    
-    version = check_cascading_options('version', choices=['Community', 'Enterprise'])
+
+    version = check_cascading_options('version', choices=['Community', 'Enterprise']).title()
     user_data = '--clustername %s --totalnodes %s --version %s' % (clustername, totalnodes, version)
 
-    if version.lower() == 'Enterprise'.lower():
+    if version == 'Enterprise':
         ignore_command_line = False
         while True:
             # Get additional information for Enterprise clusters
@@ -564,7 +568,7 @@ def main():
                 # Clear the previous cfsreplicationfactor
                 config.set('Cassandra', 'analyticsnodes')
                 ignore_command_line = True
-        
+
         # Check the number of Search Nodes that will launch
         ignore_command_line = False
         while True:
@@ -591,7 +595,7 @@ def main():
                     # Clear the previous cfsreplicationfactor
                     config.set('Cassandra', 'cfsreplicationfactor')
                     ignore_command_line = True
-        
+
             user_data += ' --cfsreplicationfactor %s' % (cfsreplicationfactor)
         print
 
@@ -641,9 +645,31 @@ def main():
 
     start_priming(user)
 
+    if version == 'Enterprise':
+        global seed_index
+        realtimenodes = totalnodes - analyticsnodes - searchnodes
+        seed_index = [0, realtimenodes, realtimenodes + analyticsnodes]
+        seed_index.reverse()
+
+    global node_types
+    node_type = 'c'
+    node_types = {'c': [], 'a':[], 's':[]}
+
     print 'Primed Connection Strings:'
-    for node in public_ips:
-        print '{0} -i {1} -o UserKnownHostsFile={2} {3}@{4}'.format(config.get('System', 'ssh'), PEM_FILE, HOST_FILE, user, node)
+    for i, node in enumerate(public_ips):
+        if version == 'Enterprise' and i in seed_index:
+            if seed_index.index(i) == 0:
+                print 'Search (Solr) Nodes:'
+                node_type = 's'
+            if seed_index.index(i) == 1:
+                print 'Analytics (Hadoop) Nodes:'
+                node_type = 'a'
+            if seed_index.index(i) == 2:
+                print 'Realtime (Cassandra) Nodes:'
+                node_type = 'c'
+
+        node_types[node_type].append(i)
+        print '    {0} -i {1} -o UserKnownHostsFile={2} {3}@{4}'.format(config.get('System', 'ssh'), PEM_FILE, HOST_FILE, user, node)
     print
 
     print 'Installing DataStax SSH on the cluster...'
