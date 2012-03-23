@@ -129,22 +129,21 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
     
     # Ensure all Security settings are active
     print "Configuring ports..."
-    authorize(ds_security_group, 22, 'public')
-    authorize(ds_security_group, 9160, 'public')
-    authorize(ds_security_group, 8012, 'public')
-    authorize(ds_security_group, 50030, 'public')
-    authorize(ds_security_group, 50060, 'public')
-    authorize(ds_security_group, 8983, 'public')
-    authorize(ds_security_group, 8888, 'public')
+    authorize(ds_security_group, 22, 'public') # SSH
+    authorize(ds_security_group, 8012, 'public') # Hadoop Job Tracker client port
+    authorize(ds_security_group, 8888, 'public') # OpsCenter website port
+    authorize(ds_security_group, 8983, 'public') # Solr default port
+    authorize(ds_security_group, 9160, 'public') # Cassandra client port
+    authorize(ds_security_group, 50030, 'public') # Hadoop Job Tracker website port
+    authorize(ds_security_group, 50060, 'public') # Hadoop Task Tracker website port
 
-    authorize(ds_security_group, 7000, 'private')
-    authorize(ds_security_group, 7199, 'private')
-    authorize(ds_security_group, 8983, 'private')
-    authorize(ds_security_group, 9290, 'private')
-    authorize(ds_security_group, 61621, 'private')
-    authorize(ds_security_group, 1024, 'private', 65535)
-    authorize(ds_security_group, 50031, 'private')
-    authorize(ds_security_group, 61620, 'private')
+    authorize(ds_security_group, 7000, 'private') # Cassandra intra-node port
+    authorize(ds_security_group, 7199, 'private') # JMX initial port
+    authorize(ds_security_group, 9290, 'private') # Hadoop Job Tracker Thrift port
+    authorize(ds_security_group, 50031, 'private') # Hadoop job tracker port
+    authorize(ds_security_group, 61620, 'private') # OpsCenter Agent port
+    authorize(ds_security_group, 61621, 'private') # OpsCenter Agent port
+    authorize(ds_security_group, 1024, 'private', 65535) # JMX reconnection ports
 
     try:
         # Create the EC2 cluster
