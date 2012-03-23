@@ -664,6 +664,10 @@ def main():
 
     if not cli_options['CLI_noprompts']:
         ec2.terminate_cluster(check_cascading_options('aws_access_key_id'), check_cascading_options('aws_secret_access_key'), config.get('EC2', 'placement'), check_cascading_options('handle'))
+    else:
+        # Ensure the agents have time to start
+        # installing before exiting the program
+        time.sleep(10)
 
 def run():
     try:
