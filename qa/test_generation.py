@@ -84,7 +84,7 @@ test_cases.append({
     'release': '2.0-1'
 })
 
-test_name = 'DSE-2.0 - Single Search'
+test_name = 'Single Search'
 test_cases.append({
     'totalnodes': 1,
     'version': 'Enterprise',
@@ -144,7 +144,7 @@ for case in test_cases:
             print '--{0} "{1}"'.format(switch, case[switch]),
         else:
             print '--{0} {1}'.format(switch, case[switch]),
-    print
+    print '--qa --noprompts'
     print
 
 print 'Manually test just --version, --clustername, --totalnodes'
