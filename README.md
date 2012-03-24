@@ -53,6 +53,7 @@ present the option to kill a cluster these tools did not launch.
 
 ## More Documentation
 
+* [CHANGES](https://github.com/joaquincasares/cassandralauncher/tree/master/CHANGES.md)
 * [Sample Runs](https://github.com/joaquincasares/cassandralauncher/tree/master/docs/sample_runs.md)
 * [New Features](https://github.com/joaquincasares/cassandralauncher/tree/master/docs/new_features.md)
 

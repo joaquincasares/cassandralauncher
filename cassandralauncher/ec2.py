@@ -132,7 +132,7 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
     authorize(ds_security_group, 22, 'public') # SSH
     authorize(ds_security_group, 8012, 'public') # Hadoop Job Tracker client port
     authorize(ds_security_group, 8888, 'public') # OpsCenter website port
-    authorize(ds_security_group, 8983, 'public') # Solr default port
+    authorize(ds_security_group, 8983, 'public') # Portfolio and Solr default port
     authorize(ds_security_group, 9160, 'public') # Cassandra client port
     authorize(ds_security_group, 50030, 'public') # Hadoop Job Tracker website port
     authorize(ds_security_group, 50060, 'public') # Hadoop Task Tracker website port
