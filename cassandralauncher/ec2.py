@@ -23,7 +23,7 @@ def authorize(security_group, port, realm, port_end_range=False):
     # Setup single ports, unless noted
     if not port_end_range:
         port_end_range = port
-    
+
     # Catch errors from overpopulating
     try:
         # Open ports publicly
@@ -36,6 +36,20 @@ def authorize(security_group, port, realm, port_end_range=False):
         else:
             sys.stderr.write('Unknown realm assigned!\n')
             sys.exit(1)
+    except boto.exception.EC2ResponseError:
+        # Continue since ports were probably trying to be overwritten
+        pass
+
+def deauthorize(security_group, port, port_end_range=False):
+
+    # Setup single ports, unless noted
+    if not port_end_range:
+        port_end_range = port
+
+    # Catch errors from overpopulating
+    try:
+        # Open ports publicly
+        security_group.revoke('tcp', port, port_end_range, '0.0.0.0/0')
     except boto.exception.EC2ResponseError:
         # Continue since ports were probably trying to be overwritten
         pass
@@ -126,9 +140,13 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
     # Create the DataStax security group if it doesn't exist
     if not ds_security_group:
         ds_security_group = conn.create_security_group('DataStax', 'Security group for running DataStax products')
-    
+
     # Ensure all Security settings are active
     print "Configuring ports..."
+
+    # Remove previous security risks made public
+    deauthorize(ds_security_group, 9160)
+
     authorize(ds_security_group, 22, 'public') # SSH
     authorize(ds_security_group, 8012, 'public') # Hadoop Job Tracker client port
     authorize(ds_security_group, 8888, 'public') # OpsCenter website port
@@ -150,12 +168,12 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
         print 'Launching cluster...'
         start_time = time.time()
         try:
-            reservation = conn.run_instances(image, 
-                                             min_count=reservation_size, 
-                                             max_count=reservation_size, 
-                                             instance_type=instance_type, 
-                                             key_name=key_pair, 
-                                             placement=placement, 
+            reservation = conn.run_instances(image,
+                                             min_count=reservation_size,
+                                             max_count=reservation_size,
+                                             instance_type=instance_type,
+                                             key_name=key_pair,
+                                             placement=placement,
                                              security_groups=['DataStax'], user_data=user_data)
         except boto.exception.EC2ResponseError:
             print_boto_error()
@@ -181,7 +199,7 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
     except (Exception, KeyboardInterrupt, EOFError) as err:
         print "\n\nERROR: Tags were never applied to started instances!!! Make sure you TERMINATE instances here:"
         print "    https://console.aws.amazon.com/ec2/home?region=us-east-1#s=Instances\n"
-        
+
         # Ensure the user acknowledges pricing danger
         while True:
             try:
