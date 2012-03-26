@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import sys
+
 test_cases = []
 
 # All possible options
@@ -136,6 +138,8 @@ test_cases.append({
 })
 
 for case in test_cases:
+    if len(sys.argv) > 1:
+        print 'cd %s' % sys.argv[1]
     print 'cassandralauncher/cassandralauncher.py ',
     switches = case.keys()
     switches.sort()
