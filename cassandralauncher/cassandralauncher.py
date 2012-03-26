@@ -208,9 +208,10 @@ def prime_connections(public_ips, user):
 
     print "Priming connections..."
 
-    # Clear previous file
-    with open(HOST_FILE, 'w') as f:
-        f.write('')
+    # Clear previous file, if not running parallel tests
+    if not cli_options['CLI_qa']:
+        with open(HOST_FILE, 'w') as f:
+            f.write('')
 
     accept_rsa_fingerprints = config.get('Cassandra', 'accept_rsa_fingerprints')
 
