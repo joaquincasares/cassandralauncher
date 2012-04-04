@@ -48,8 +48,10 @@ def deauthorize(security_group, port, port_end_range=False):
 
     # Catch errors from overpopulating
     try:
-        # Open ports publicly
-        security_group.revoke('tcp', port, port_end_range, '0.0.0.0/0')
+        # Check first if there are rules to revoke
+        if security_group.rules:
+            # Open ports publicly
+            security_group.revoke('tcp', port, port_end_range, '0.0.0.0/0')
     except boto.exception.EC2ResponseError:
         # Continue since ports were probably trying to be overwritten
         pass
