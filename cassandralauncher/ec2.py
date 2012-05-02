@@ -73,7 +73,7 @@ def print_boto_error():
 
 
 
-def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, image, tag, key_pair, instance_type, placement, pem_home, user_data=None, noprompts=False):
+def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, image, tag, key_pair, instance_type, placement, pem_home, user_data=None, noprompts=False, opscenterinterface=False):
 
     # Connect to EC2
     print 'Starting an EC2 cluster of type {0} with image {1}...'.format(instance_type, image)
@@ -151,7 +151,10 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
 
     authorize(ds_security_group, 22, 'public') # SSH
     authorize(ds_security_group, 8012, 'public') # Hadoop Job Tracker client port
-    authorize(ds_security_group, 8888, 'public') # OpsCenter website port
+    if opscenterinterface:
+        authorize(ds_security_group, int(opscenterinterface), 'public') # OpsCenter website port
+    else:
+        authorize(ds_security_group, 8888, 'public') # OpsCenter website port
     authorize(ds_security_group, 8983, 'public') # Portfolio and Solr default port
     authorize(ds_security_group, 50030, 'public') # Hadoop Job Tracker website port
     authorize(ds_security_group, 50060, 'public') # Hadoop Task Tracker website port

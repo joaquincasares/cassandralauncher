@@ -410,6 +410,11 @@ options_tree = {
         'Prompt': 'EC2 Instance Size:',
         'Help': 'm1.large | m1.xlarge | m2.xlarge | m2.2xlarge | m2.4xlarge'
     },
+    'opscenterinterface': {
+        'Section': 'OpsCenter',
+        'Prompt': 'NoPrompts',
+        'Help': 'Sets the OpsCenter interface port'
+    },
     'noprompts':{
         'Section': 'CLI',
         'Prompt': 'NoPrompts',
@@ -614,6 +619,11 @@ def main():
     if check_cascading_options('release', optional=True):
         user_data += ' --release %s' % check_cascading_options('release')
 
+    opscenterinterface = 8888
+    if check_cascading_options('opscenterinterface', optional=True):
+        opscenterinterface = check_cascading_options('opscenterinterface')
+        user_data += ' --opscenterinterface %s' % opscenterinterface
+
     # DataStax AMI specific options and formatting
     image = check_cascading_options('datastax_ami', optional=True)
     if not image:
@@ -627,7 +637,7 @@ def main():
     clusterinfo = ec2.create_cluster(check_cascading_options('aws_access_key_id'), check_cascading_options('aws_secret_access_key'),
                                     totalnodes, image, tag, KEY_PAIR,
                                     instance_type, config.get('EC2', 'placement'), PEM_HOME,
-                                    user_data, cli_options['CLI_noprompts'])
+                                    user_data, cli_options['CLI_noprompts'], opscenterinterface)
 
     # Save IPs
     global private_ips
@@ -640,7 +650,7 @@ def main():
     if check_cascading_options('installopscenter', optional=True) != 'False':
         # Print OpsCenter url
         print "OpsCenter Address:"
-        print "http://%s:8888" % public_ips[0]
+        print "http://%s:%s" % (public_ips[0], opscenterinterface)
         print "Note: You must wait 60 seconds after Cassandra becomes active to access OpsCenter."
         print
 
