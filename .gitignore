@@ -1,0 +1,6 @@
+*.pyc
+TODO
+CassandraLauncher.egg-info/
+running.log
+dist/
+cassandralauncher/nodelist
