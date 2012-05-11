@@ -193,7 +193,7 @@ def main():
 
     if action == 'Destroy':
         if cloud == 'EC2':
-            ec2.terminate_cluster(config.get('EC2', 'aws_access_key_id'), config.get('EC2', 'aws_secret_access_key'), config.get('Shared', 'handle'))
+            ec2.terminate_cluster(config.get('EC2', 'aws_access_key_id'), config.get('EC2', 'aws_secret_access_key'), config.get('EC2', 'placement'), config.get('Shared', 'handle'))
         if cloud == 'Rackspace':
             rax.terminate_cluster(config.get('Rax', 'rax_user'), config.get('Rax', 'rax_api_key'), config.get('Shared', 'handle'))
         sys.exit()
