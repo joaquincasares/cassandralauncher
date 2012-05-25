@@ -633,7 +633,7 @@ def main():
     # DataStax AMI specific options and formatting
     image = check_cascading_options('datastax_ami', optional=True)
     if not image:
-        image = 'ami-fd23ec94'
+        image = 'ami-6139e708'
 
     tag = '{0} - DataStaxAMI Time: {1} Size: {2}'.format(check_cascading_options('handle'), time.strftime("%m-%d-%y %H:%M", time.localtime()), totalnodes)
     user = 'ubuntu'
