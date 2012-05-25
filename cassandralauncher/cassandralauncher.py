@@ -220,7 +220,13 @@ def prime_connections(public_ips, user):
 
         while True:
             # Get public RSA key
-            rsa_key = exe('ssh-keyscan -t rsa {0}'.format(ip))[0]
+            get_rsa_command = 'ssh-keyscan -t rsa {0}'.format(ip)
+            rsa_key = exe(get_rsa_command)[0]
+
+            if not rsa_key:
+                sys.stderr.write('{0} failed to return a key. Please ensure this command works on your system.\n'.format(get_rsa_command))
+                sys.exit(1)
+
             with tempfile.NamedTemporaryFile() as tmp_file:
                 tmp_file.write(rsa_key)
                 tmp_file.flush()

@@ -82,14 +82,14 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
 
     # Ensure PEM key is created
     try:
-        print "Ensuring DataStax pem key exists on AWS..."
+        print "Ensuring %s pem key exists on AWS..." % key_pair
         key = conn.get_all_key_pairs(keynames=[key_pair])[0]
 
-        print "Ensuring DataStax pem key exists on filesystem..."
+        print "Ensuring %s pem key exists on filesystem..." % key_pair
         # Print a warning message if the pem file can't be found
         pem_file = os.path.join(pem_home, key_pair + '.pem')
         if os.path.isfile(pem_file):
-            print "Ensuring DataStax pem key's permissions are acceptable..."
+            print "Ensuring %s pem key's permissions are acceptable..." % key_pair
             # Print a warning message is the pem file does not have the correct file permissions
             permissions = os.stat(pem_file).st_mode
             if not (bool(permissions & stat.S_IRUSR) and     # Ensure owner can read
