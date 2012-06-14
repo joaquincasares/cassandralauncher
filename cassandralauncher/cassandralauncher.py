@@ -39,8 +39,13 @@ def exe(command, wait=True):
 def create_ssh_cmd(sshuser, host):
     """SSH function that returns SSH string"""
 
-    connstring = "%s -i %s -o UserKnownHostsFile=%s %s@%s " % (
+    additional_options = ''
+    if cli_options['CLI_qa']:
+        additional_options = '-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+
+    connstring = "%s %s -i %s -o UserKnownHostsFile=%s %s@%s " % (
                         config.get('System', 'ssh'),
+                        additional_options,
                         PEM_FILE,
                         HOST_FILE,
                         sshuser, host
@@ -218,13 +223,18 @@ def prime_connections(public_ips, user):
     # Prompt for RSA fingerprint authentication for each IP
     for ip in public_ips:
 
+        retries = 0
         while True:
             # Get public RSA key
             get_rsa_command = 'ssh-keyscan -t rsa {0}'.format(ip)
             rsa_key = exe(get_rsa_command)[0]
 
             if not rsa_key:
-                sys.stderr.write('{0} failed to return a key. Please ensure this command works on your system.\n'.format(get_rsa_command))
+                if retries < 10:
+                    retries += 1
+                    continue
+
+                sys.stderr.write('`{0}` failed to return a key. Please ensure this command works on your system.\n'.format(get_rsa_command))
                 sys.exit(1)
 
             with tempfile.NamedTemporaryFile() as tmp_file:
@@ -278,15 +288,15 @@ def install_opsc_agents(user):
 
         print "Waiting for the agent tarball to be created (This can take up to 4 minutes)..."
         print "    If taking longer, ctrl-C and login to AMI to see error logs."
-        while exe_ssh_cmd(opsc_conn, "ls /usr/share/opscenter/agent/opscenter-agent.tar.gz")[1]:
+        while exe_ssh_cmd(opsc_conn, "ls /usr/share/opscenter/agent.tar.gz")[1]:
             # The agent tarball has yet to be created
             time.sleep(5)
 
         # Ensures the tarball is fully written before transferring
         while True:
-            old_md5 = exe_ssh_cmd(opsc_conn, "md5sum /usr/share/opscenter/agent/opscenter-agent.tar.gz")[0]
+            old_md5 = exe_ssh_cmd(opsc_conn, "md5sum /usr/share/opscenter/agent.tar.gz")[0]
             time.sleep(2)
-            new_md5 = exe_ssh_cmd(opsc_conn, "md5sum /usr/share/opscenter/agent/opscenter-agent.tar.gz")[0]
+            new_md5 = exe_ssh_cmd(opsc_conn, "md5sum /usr/share/opscenter/agent.tar.gz")[0]
 
             if old_md5 == new_md5:
                 break
@@ -296,13 +306,19 @@ def install_opsc_agents(user):
             node_conn = create_ssh_cmd(user, node)
 
             # Copying OpsCenter Agent tarball
-            exe_ssh_cmd(opsc_conn, "scp /usr/share/opscenter/agent/opscenter-agent.tar.gz %s:opscenter-agent.tar.gz" % node)
+            exe_ssh_cmd(opsc_conn, "scp /usr/share/opscenter/agent.tar.gz %s:agent.tar.gz" % node)
+
+            # OpsCenter 2.1.0 workaround
+            exe_ssh_cmd(opsc_conn, "scp -r /usr/share/opscenter/agent/ssl %s:" % node)
 
             # Untarring tarball
-            exe_ssh_cmd(node_conn, "sudo mv -f opscenter-agent.tar.gz /usr/share; cd /usr/share; sudo tar --overwrite -xzf opscenter-agent.tar.gz; sudo rm -f opscenter-agent.tar.gz")
+            exe_ssh_cmd(node_conn, "sudo mv -f agent.tar.gz /usr/share; cd /usr/share; sudo tar --overwrite -xzf agent.tar.gz; sudo rm -f agent.tar.gz")
 
             # Starting installation of OpsCenter Agent
-            exe_ssh_cmd(node_conn, "cd /usr/share/opscenter-agent/; sudo nohup bin/install_agent.sh opscenter-agent.deb %s %s" % (private_ips[0], private_ips[i]), wait=False)
+            exe_ssh_cmd(node_conn, "cd /usr/share/agent/; sudo bin/install_agent.sh opscenter-agent.deb %s %s" % (private_ips[0], private_ips[i]))
+
+            # OpsCenter 2.1.0 workaround
+            exe_ssh_cmd(node_conn, "sudo mv ssl/* /var/lib/opscenter-agent/ssl; rm -rf ssl; sudo service opscenter-agent restart")
     print
 
 #################################

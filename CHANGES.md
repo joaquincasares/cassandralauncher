@@ -4,6 +4,8 @@ Changes
 * 1.15-0: Regions besides us-east-1 now supported.
 * 1.16-0: DSE 2.0 support. QA folder with test generation
 and smoke testing scripts.
+* 1.17-0: Notify users when `ssh-keyscan` fails and workaround
+OpsCenter 2.1.0 bug with installing agents.
 
 Automated Features
 ==================
