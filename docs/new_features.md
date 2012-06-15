@@ -22,7 +22,7 @@ Now you can simply run the DataStax Parallel SSH Client by executing: `datastax_
 
 Now you can use the `datastax_s3_store` and `datastax_s3_restore` commands to simply upload and download your `cassandra/data` directory to and from S3. Think of it as an "experimental EBS functionality for S3." 
 
-*Note*: _Do not count on this feature to save important data. This is for development-only application of trivial data._
+*Note*: _Do not count on this feature to save important data. This application is only for trivial data in development environments._
 
 The files are stored in `s3://datastax_s3_storage-<YOUR_AWS_ACCESS_KEY_ID>/<CLUSTER_NAME>/<NODES_TOKEN>` using the `~/.s3cfg` file.
 
