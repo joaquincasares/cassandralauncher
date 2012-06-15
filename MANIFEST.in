@@ -1,3 +1,7 @@
 include README.md
 include cassandralauncher/clusterlauncher.conf
+include cassandralauncher/datastax_s3_store
+include cassandralauncher/datastax_s3_restore
 include cassandralauncher/datastax_ssh
+include cassandralauncher/datastax_pssh
+include cassandralauncher/s3cfg
