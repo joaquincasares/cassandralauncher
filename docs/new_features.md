@@ -12,7 +12,9 @@ Now you can simply run the DataStax SSH Client by executing: `datastax_ssh`. Thi
 
 ## Modified /etc/hosts
 
-Now you can simply run an `ssh node0` or `ssh node1` command and easily jump from node to node from within your cluster.
+Now you can simply run an `ssh c0` or `ssh a0` command and easily jump from node to node from within your cluster.
+
+A prefix of `c` is reserved for Cassandra nodes, `a` for Analytics nodes, and `s` for Search nodes. The numerical suffix refers to their order within the ring. View `/etc/hosts` on the node for more details.
 
 ## DataStax Parallel SSH Client
 
