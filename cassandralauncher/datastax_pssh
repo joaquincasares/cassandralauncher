@@ -1,0 +1,74 @@
+#!/usr/bin/env python
+### Script provided by DataStax.
+
+import os
+import random
+import subprocess
+import shlex
+import sys
+
+
+commands = [
+    'Enter a custom command...',
+    'nodetool -h localhost ring',
+    'datastax_s3_store',
+    'datastax_s3_restore',
+    'sudo /etc/init.d/cassandra start',
+    'sudo /etc/init.d/cassandra stop',
+    'sudo /etc/init.d/cassandra restart'
+]
+
+# Function to execute commands and print traces of the command and output for debugging/logging purposes
+def exe(command, log=True):
+    # Executes command and wait for completion
+    process = subprocess.Popen(shlex.split(command), stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    read = process.communicate()
+
+    # Prints output to stdout
+    print read[0]
+    print read[1]
+
+    # return process
+    return read
+
+def datastax_ssh(command):
+    exe('parallel-ssh --hosts /etc/cassandralauncher/nodelist --user ubuntu --print %s' % command)
+
+try:
+    print "Welcome to DataStax' Parallel SSH Utility!"
+    print
+
+    selection = False
+    while not selection:
+        print "Choose a command to run across the cluster:"
+        for i, command in enumerate(commands):
+            print "    %s. %s" % (i, command)
+
+        try:
+            selection = int(raw_input(""))
+            print
+
+            if selection == 0:
+                selection = raw_input("Please input your command: ")
+                print
+            else:
+                if selection in [2, 3]:
+                    number = random.randint(0, 100)
+                    if raw_input("Enter the number '%s' to verify you wish to run `%s` clusterwide: " % (number, commands[selection])) != str(number):
+                        sys.exit(1)
+                    else:
+                        print "Performing command: %s..." % commands[selection]
+
+                selection = commands[selection]
+        except KeyboardInterrupt:
+            raise
+        except:
+            print "Invalid selection. Please try again."
+            print
+            selection = False
+
+    datastax_ssh(selection)
+# Catch, log, and display pretty KeyboardInterrupts
+except KeyboardInterrupt:
+    print
+    pass

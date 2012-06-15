@@ -110,8 +110,14 @@ def install_datastax_ssh(user):
         # Send files to the cluster
         for ip in public_ips:
             scp_send(user, ip, tmp_file.name, 'nodelist')
+
             scp_send(user, ip, datastax_ssh)
-            exe_ssh_cmd(create_ssh_cmd(user, ip), 'chmod +x datastax_ssh; sudo mv datastax_ssh /usr/bin/datastax_ssh; sudo mkdir /etc/cassandralauncher; sudo mv nodelist /etc/cassandralauncher/nodelist')
+            scp_send(user, ip, datastax_ssh.replace('datastax_ssh', 'datastax_pssh'))
+
+            exe_ssh_cmd(create_ssh_cmd(user, ip), 'chmod +x datastax_ssh; sudo mv datastax_ssh /usr/bin/')
+            exe_ssh_cmd(create_ssh_cmd(user, ip), 'chmod +x datastax_pssh; sudo mv datastax_pssh /usr/bin/')
+
+            exe_ssh_cmd(create_ssh_cmd(user, ip), 'sudo mkdir /etc/cassandralauncher; sudo mv nodelist /etc/cassandralauncher/nodelist')
 
 def upload_smoke_tests(user):
     # Find the datastax_ssh original file
@@ -144,6 +150,35 @@ def install_hosts_appending(user):
             scp_send(user, ip, tmp_file.name, 'hosts_file')
             exe_ssh_cmd(create_ssh_cmd(user, ip), "sudo su -c 'cat hosts_file >> /etc/hosts'")
             exe_ssh_cmd(create_ssh_cmd(user, ip), 'rm hosts_file')
+
+def setup_s3_store_and_restore(user):
+    # Look for the configuration file in the same directory as the launcher
+    s3cfg_default = os.path.join(os.path.dirname(__file__), 's3cfg')
+    if not os.path.exists(s3cfg_default):
+        # Look for the configuration file in the user's home directory
+        s3cfg_default = os.path.join(os.path.expanduser('~'), '.s3cfg')
+    if not os.path.exists(s3cfg_default):
+        # Look for the configuration file in /etc/clusterlauncher
+        s3cfg_default = os.path.join('/etc', 'cassandralauncher', 's3cfg')
+    with open(s3cfg_default) as f:
+        s3cfg = f.read()
+
+    s3cfg = s3cfg.replace('$ACCESS_KEY', check_cascading_options('aws_access_key_id'))
+    s3cfg = s3cfg.replace('$SECRET_KEY', check_cascading_options('aws_secret_access_key'))
+
+    with tempfile.NamedTemporaryFile() as tmp_file:
+        tmp_file.write(s3cfg)
+        tmp_file.flush()
+
+        for ip in public_ips:
+            if check_cascading_options('send_s3_credentials', optional=True, ignore_command_line=True):
+                scp_send(user, ip, tmp_file.name, '.s3cfg')
+                exe_ssh_cmd(create_ssh_cmd(user, ip), 'chmod 400 .s3cfg')
+
+            scp_send(user, ip, os.path.join(os.path.dirname(__file__), 'datastax_s3_store'), 'datastax_s3_store')
+            scp_send(user, ip, os.path.join(os.path.dirname(__file__), 'datastax_s3_restore'), 'datastax_s3_restore')
+            exe_ssh_cmd(create_ssh_cmd(user, ip), 'chmod +x datastax_s3*; sudo mv datastax_s3* /usr/bin/')
+
 
 #################################
 
@@ -366,6 +401,12 @@ options_tree = {
         'Section': 'EC2',
         'Prompt': 'AWS Secret Access Key',
         'Help': 'AWS Secret Access Key'
+    },
+    'send_s3_credentials': {
+        'Section': 'S3',
+        'Prompt': 'Send S3 Credentials',
+        'Action': 'store_true',
+        'Help': 'Specify if S3 Credentials get uploaded'
     },
     'clustername': {
         'Section': 'Cassandra',
@@ -714,6 +755,9 @@ def main():
 
     print 'Setting up the hosts file for the cluster...'
     install_hosts_appending(user)
+
+    print 'Setting up datastax_s3_store and datastax_s3_restore capabilities...'
+    setup_s3_store_and_restore(user)
 
     install_opsc_agents(user)
 

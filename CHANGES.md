@@ -6,6 +6,8 @@ Changes
 and smoke testing scripts.
 * 1.17-0: Notify users when `ssh-keyscan` fails and workaround
 OpsCenter 2.1.0 bug with installing agents.
+* 1.18-0: Added datastax_pssh and s3 store/restore functionality.
+See [New Features](https://github.com/joaquincasares/cassandralauncher/tree/master/docs/new_features.md) for details.
 
 Automated Features
 ==================

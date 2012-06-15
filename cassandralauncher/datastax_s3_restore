@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+
+import ConfigParser
+import os
+import re
+import shlex
+import subprocess
+import yaml
+
+configfile = '/home/ubuntu/.s3cfg'
+
+def exe(command, wait=True):
+    """Execute a subprocess command"""
+
+    # Open a subprocess to run your command
+    process = subprocess.Popen(shlex.split(str(command)), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if wait:
+        read = process.communicate()
+        return read
+    else:
+        return process
+
+def s3_restore():
+    print "Stopping the node..."
+    exe('sudo service dse stop')
+    exe('sudo service cassandra stop')
+
+    print "Clearing current data..."
+    exe('sudo rm -rf %s/*' % os.path.join(root_data_dir, 'data'))
+
+    print "Downloading data..."
+    response = exe('sudo s3cmd sync --delete-removed s3://%s-%s/%s/%s/ %s' % (
+        bucket_name, access_key,
+        cluster_name, initial_token,
+        os.path.join(root_data_dir, 'data/')
+    ))
+    if response[1]:
+        print response[1]
+
+    print "Restarting the node..."
+    exe('sudo service dse restart')
+    exe('sudo service cassandra restart')
+
+
+# Read access_key
+config = ConfigParser.RawConfigParser()
+config.read(configfile)
+access_key = config.get('default', 'access_key')
+bucket_name = config.get('datastax', 'bucket_name') if config.has_option('default', 'bucket_name') else 'datastax_s3_storage'
+root_data_dir = config.get('datastax', 'root_data_dir') if config.has_option('default', 'root_data_dir') else '/raid0/cassandra'
+
+# Read cluster_name and initial_token
+with open('/etc/dse/cassandra/cassandra.yaml') as f:
+    dataMap = yaml.load(f)
+cluster_name = re.sub(r'\W+', '_', dataMap['cluster_name'])
+initial_token = dataMap['initial_token']
+
+s3_restore()
