@@ -10,6 +10,7 @@ OpsCenter 2.1.0 bug with installing agents.
 See [New Features](https://github.com/joaquincasares/cassandralauncher/tree/master/docs/new_features.md) for details.
 * 1.18-1: Added needed files to the manifest.
 * 1.18-1: Added needed files to setup.py.
+* 1.18-3: Display RAX authentication errors.
 
 Automated Features
 ==================
