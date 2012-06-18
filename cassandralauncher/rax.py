@@ -31,15 +31,18 @@ def create_cluster(rax_user, rax_api_key, reservation_size, image, tag, flavor):
             # '/root/.ssh/id_rsa' : open(os.path.expanduser("~/.ssh/id_rsa"), 'r')
         }
 
-        servers.append(
-            cloudservers.servers.create(
+        try:
+            server = cloudservers.servers.create(
                 image=image,
                 flavor=flavor,
                 name=tag,
                 files=transfer_files
             )
-        )
-    
+            servers.append(server)
+        except:
+            sys.stderr.write('Rackspace authentication failed. Please check your Rackspace authentication and try again.\n')
+            sys.exit(1)
+
     print 'Waiting for cluster...'
     time.sleep(10)
     print '    Nodes that have been allocated by Rackspace:'
@@ -69,7 +72,11 @@ def terminate_cluster(rax_user, rax_api_key, search_term):
     # Grab all the infomation for clusters spawn by this tool that are still alive
     ds_reservations = {}
     cloudservers = CloudServers(rax_user, rax_api_key)
-    serverlist = cloudservers.servers.list()
+    try:
+        serverlist = cloudservers.servers.list()
+    except:
+        sys.stderr.write('Rackspace authentication failed. Please check your Rackspace authentication and try again.\n')
+        sys.exit(1)
 
     p = re.compile("{0}.*".format(search_term))
 
@@ -109,11 +116,11 @@ def terminate_cluster(rax_user, rax_api_key, search_term):
 
 # NOTES:
 # cloudservers = CloudServers(user, apiKey)
-# 
+#
 # Find Flavor List
 # for i in cloudservers.flavors.list():
 #     print "ID: %s = %s" % (i.id, i.name)
-# 
+#
 # Find Image List
 # for i in cloudservers.images.list():
 #     print "ID: %s = %s" % (i.id, i.name)
