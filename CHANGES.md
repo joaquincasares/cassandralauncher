@@ -9,8 +9,9 @@ OpsCenter 2.1.0 bug with installing agents.
 * 1.18-0: Added datastax_pssh and s3 store/restore functionality.
 See [New Features](https://github.com/joaquincasares/cassandralauncher/tree/master/docs/new_features.md) for details.
 * 1.18-1: Added needed files to the manifest.
-* 1.18-1: Added needed files to setup.py.
+* 1.18-2: Added needed files to setup.py.
 * 1.18-3: Display RAX authentication errors.
+* 1.18-4: Allows the --qa switch to run in parallel threads.
 
 Automated Features
 ==================

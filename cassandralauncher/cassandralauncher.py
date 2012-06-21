@@ -323,7 +323,7 @@ def install_opsc_agents(user):
 
         print "Waiting for the agent tarball to be created (This can take up to 4 minutes)..."
         print "    If taking longer, ctrl-C and login to AMI to see error logs."
-        while exe_ssh_cmd(opsc_conn, "ls /usr/share/opscenter/agent.tar.gz")[1]:
+        while 'cannot access' in exe_ssh_cmd(opsc_conn, "ls /usr/share/opscenter/agent.tar.gz")[1]:
             # The agent tarball has yet to be created
             time.sleep(5)
 
@@ -716,6 +716,10 @@ def main():
         print "http://%s:%s" % (public_ips[0], opscenterinterface)
         print "Note: You must wait 60 seconds after Cassandra becomes active to access OpsCenter."
         print
+
+        if cli_options['CLI_qa']:
+            print "OPSCENTER_IP:%s" % public_ips[0]
+            print "OPSCENTER_PORT:%s" % opscenterinterface
 
     start_priming(user)
 
