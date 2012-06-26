@@ -267,6 +267,7 @@ def prime_connections(public_ips, user):
             if not rsa_key:
                 if retries < 10:
                     retries += 1
+                    time.sleep(2)
                     continue
 
                 sys.stderr.write('`{0}` failed to return a key. Please ensure this command works on your system.\n'.format(get_rsa_command))

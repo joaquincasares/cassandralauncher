@@ -12,6 +12,7 @@ See [New Features](https://github.com/joaquincasares/cassandralauncher/tree/mast
 * 1.18-2: Added needed files to setup.py.
 * 1.18-3: Display RAX authentication errors.
 * 1.18-4: Allows the --qa switch to run in parallel threads.
+* 1.18-5: Trying to fine tune the no RSA key edge case.
 
 Automated Features
 ==================
