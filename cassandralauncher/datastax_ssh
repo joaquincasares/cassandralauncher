@@ -14,7 +14,10 @@ commands = [
     'sudo tail /var/log/cassandra/system.log',
     'sudo /etc/init.d/cassandra start',
     'sudo /etc/init.d/cassandra stop',
-    'sudo /etc/init.d/cassandra restart'
+    'sudo /etc/init.d/cassandra restart',
+    'sudo /etc/init.d/dse start',
+    'sudo /etc/init.d/dse stop',
+    'sudo /etc/init.d/dse restart'
 ]
 
 # Function to execute commands and print traces of the command and output for debugging/logging purposes
