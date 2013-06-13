@@ -403,6 +403,11 @@ options_tree = {
         'Prompt': 'AWS Secret Access Key',
         'Help': 'AWS Secret Access Key'
     },
+    'security_public_inbound_source': {
+        'Section': 'EC2',
+        'Prompt': "Security Group Public Ports' Inbound Source",
+        'Help': "Specify the security group's inbound source for public ports in CIDR format. Multiple values can be comma-separated. (e.g. '0.0.0.0/0' or '10.0.0.0/8, 192.168.1.0/24')"
+    },
     'send_s3_credentials': {
         'Section': 'S3',
         'Prompt': 'Send S3 Credentials',

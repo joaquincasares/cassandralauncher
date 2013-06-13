@@ -18,17 +18,31 @@ from xml.dom.minidom import parseString
 
 import common
 
-def authorize(security_group, port, realm, port_end_range=False):
+def authorize(security_group, port, realm, port_end_range=False, public_inbound_source='0.0.0.0/0'):
 
     # Setup single ports, unless noted
     if not port_end_range:
         port_end_range = port
 
+
     # Catch errors from overpopulating
     try:
         # Open ports publicly
         if realm == 'public':
-            security_group.authorize('tcp', port, port_end_range, '0.0.0.0/0')
+            sources = {s.strip() for s in public_inbound_source.split(',')}
+            for rule in security_group.rules:
+                if (rule.ip_protocol == 'tcp' and int(rule.from_port) == port and
+                    int(rule.to_port) == port_end_range):
+                    grants = {g.cidr_ip for g in rule.grants}
+                    if grants == sources:
+                        # Rule already exists and is correct
+                        print port, 'found and exists'
+                        return
+                    print port, 'deauthorizing'
+                    deauthorize(security_group, port, port_end_range)
+                    break
+            print 'authorizing', sources
+            security_group.authorize('tcp', port, port_end_range, list(sources))
         # Open ports privately
         elif realm == 'private':
             security_group.authorize('tcp', port, port_end_range, src_group=security_group)
@@ -49,9 +63,14 @@ def deauthorize(security_group, port, port_end_range=False):
     # Catch errors from overpopulating
     try:
         # Check first if there are rules to revoke
-        if security_group.rules:
-            # Open ports publicly
-            security_group.revoke('tcp', port, port_end_range, '0.0.0.0/0')
+        for rule in security_group.rules:
+            if (rule.ip_protocol == 'tcp' and int(rule.from_port) == port and
+                int(rule.to_port) == port_end_range):
+                for grant in rule.grants:
+                    security_group.revoke('tcp', port, port_end_range, cidr_ip=grant.cidr_ip,
+                                          src_group=(grant if grant.group_id else None))
+                break
+
     except boto.exception.EC2ResponseError:
         # Continue since ports were probably trying to be overwritten
         pass
@@ -73,7 +92,7 @@ def print_boto_error():
 
 
 
-def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, image, tag, key_pair, instance_type, placement, pem_home, user_data=None, noprompts=False, opscenterinterface=False):
+def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, image, tag, key_pair, instance_type, placement, pem_home, user_data=None, noprompts=False, opscenterinterface=False, security_public_inbound_source='0.0.0.0/0'):
 
     # Connect to EC2
     print 'Starting an EC2 cluster of type {0} with image {1}...'.format(instance_type, image)
@@ -149,15 +168,15 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
     # Remove previous security risks made public
     deauthorize(ds_security_group, 9160)
 
-    authorize(ds_security_group, 22, 'public') # SSH
-    authorize(ds_security_group, 8012, 'public') # Hadoop Job Tracker client port
+    authorize(ds_security_group, 22, 'public', security_public_inbound_source) # SSH
+    authorize(ds_security_group, 8012, 'public', security_public_inbound_source) # Hadoop Job Tracker client port
     if opscenterinterface:
-        authorize(ds_security_group, int(opscenterinterface), 'public') # OpsCenter website port
+        authorize(ds_security_group, int(opscenterinterface), 'public', security_public_inbound_source) # OpsCenter website port
     else:
-        authorize(ds_security_group, 8888, 'public') # OpsCenter website port
-    authorize(ds_security_group, 8983, 'public') # Portfolio and Solr default port
-    authorize(ds_security_group, 50030, 'public') # Hadoop Job Tracker website port
-    authorize(ds_security_group, 50060, 'public') # Hadoop Task Tracker website port
+        authorize(ds_security_group, 8888, 'public', security_public_inbound_source) # OpsCenter website port
+    authorize(ds_security_group, 8983, 'public', security_public_inbound_source) # Portfolio and Solr default port
+    authorize(ds_security_group, 50030, 'public', security_public_inbound_source) # Hadoop Job Tracker website port
+    authorize(ds_security_group, 50060, 'public', security_public_inbound_source) # Hadoop Task Tracker website port
 
     authorize(ds_security_group, 7000, 'private') # Cassandra intra-node port
     authorize(ds_security_group, 7199, 'private') # JMX initial port
