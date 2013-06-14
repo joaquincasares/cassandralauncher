@@ -24,7 +24,6 @@ def authorize(security_group, port, realm, port_end_range=False, public_inbound_
     if not port_end_range:
         port_end_range = port
 
-
     # Catch errors from overpopulating
     try:
         # Open ports publicly
@@ -33,15 +32,14 @@ def authorize(security_group, port, realm, port_end_range=False, public_inbound_
             for rule in security_group.rules:
                 if (rule.ip_protocol == 'tcp' and int(rule.from_port) == port and
                     int(rule.to_port) == port_end_range):
-                    grants = {g.cidr_ip for g in rule.grants}
+                    grants = {g.cidr_ip for g in rule.grants
+                              if g.group_id != security_group.id}
                     if grants == sources:
                         # Rule already exists and is correct
-                        print port, 'found and exists'
                         return
-                    print port, 'deauthorizing'
-                    deauthorize(security_group, port, port_end_range)
+                    if grants:
+                      deauthorize(security_group, port, port_end_range)
                     break
-            print 'authorizing', sources
             security_group.authorize('tcp', port, port_end_range, list(sources))
         # Open ports privately
         elif realm == 'private':
@@ -168,16 +166,17 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
     # Remove previous security risks made public
     deauthorize(ds_security_group, 9160)
 
-    authorize(ds_security_group, 22, 'public', security_public_inbound_source) # SSH
-    authorize(ds_security_group, 8012, 'public', security_public_inbound_source) # Hadoop Job Tracker client port
+    authorize(ds_security_group, 22, 'public', public_inbound_source=security_public_inbound_source) # SSH
+    authorize(ds_security_group, 8012, 'public', public_inbound_source=security_public_inbound_source) # Hadoop Job Tracker client port
     if opscenterinterface:
-        authorize(ds_security_group, int(opscenterinterface), 'public', security_public_inbound_source) # OpsCenter website port
+        authorize(ds_security_group, int(opscenterinterface), 'public', public_inbound_source=security_public_inbound_source) # OpsCenter website port
     else:
-        authorize(ds_security_group, 8888, 'public', security_public_inbound_source) # OpsCenter website port
-    authorize(ds_security_group, 8983, 'public', security_public_inbound_source) # Portfolio and Solr default port
-    authorize(ds_security_group, 50030, 'public', security_public_inbound_source) # Hadoop Job Tracker website port
-    authorize(ds_security_group, 50060, 'public', security_public_inbound_source) # Hadoop Task Tracker website port
+        authorize(ds_security_group, 8888, 'public', public_inbound_source=security_public_inbound_source) # OpsCenter website port
+    authorize(ds_security_group, 8983, 'public', public_inbound_source=security_public_inbound_source) # Portfolio and Solr default port
+    authorize(ds_security_group, 50030, 'public', public_inbound_source=security_public_inbound_source) # Hadoop Job Tracker website port
+    authorize(ds_security_group, 50060, 'public', public_inbound_source=security_public_inbound_source) # Hadoop Task Tracker website port
 
+    authorize(ds_security_group, 22, 'private') # SSH between nodes
     authorize(ds_security_group, 7000, 'private') # Cassandra intra-node port
     authorize(ds_security_group, 7199, 'private') # JMX initial port
     authorize(ds_security_group, 9160, 'private') # Cassandra client port
