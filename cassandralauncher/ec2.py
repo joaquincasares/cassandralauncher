@@ -166,6 +166,9 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
     # Remove previous security risks made public
     deauthorize(ds_security_group, 9160)
 
+    if not security_public_inbound_source:
+        security_public_inbound_source = '0.0.0.0/0'
+
     authorize(ds_security_group, 22, 'public', public_inbound_source=security_public_inbound_source) # SSH
     authorize(ds_security_group, 8012, 'public', public_inbound_source=security_public_inbound_source) # Hadoop Job Tracker client port
     if opscenterinterface:

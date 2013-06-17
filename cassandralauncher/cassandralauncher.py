@@ -709,7 +709,7 @@ def main():
                                      instance_type, config.get('EC2', 'placement'), PEM_HOME,
                                      user_data, cli_options['CLI_noprompts'],
                                      opscenterinterface,
-                                     check_cascading_options('security_public_inbound_source'))
+                                     check_cascading_options('security_public_inbound_source', optional=True))
 
     # Save IPs
     global private_ips
