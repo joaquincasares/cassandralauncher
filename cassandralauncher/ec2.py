@@ -185,12 +185,17 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
 
         # Sleep so Amazon recognizes the new instance
         print 'Waiting for EC2 cluster to instantiate...'
-        time.sleep(15)
+        time.sleep(12)
         print '    Nodes that have been allocated by EC2:'
-        for i, instance in enumerate(reservation.instances):
-            while not instance.update() == 'running':
-                time.sleep(3)
-            print '        Node %s' % (i)
+        launching = set(reservation.instances)
+        running = set()
+        while launching:
+            time.sleep(3)
+            for instance in launching:
+                if instance.update() == 'running':
+                    print '        Node %s' % (instance.ami_launch_index)
+                    running.add(instance)
+            launching.difference_update(running)
         print
 
         print "Cluster booted successfully!"
@@ -216,11 +221,12 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
             raise err
 
     # Collect ip addresses
-    private_ips = []
-    public_ips = []
+    private_ips = range(len(reservation.instances))
+    public_ips = range(len(reservation.instances))
     for instance in reservation.instances:
-        private_ips.append(instance.private_ip_address)
-        public_ips.append(instance.ip_address)
+        idx = int(instance.ami_launch_index)
+        private_ips[idx] = instance.private_ip_address
+        public_ips[idx] = instance.ip_address
 
     return [private_ips, public_ips, reservation]
 
