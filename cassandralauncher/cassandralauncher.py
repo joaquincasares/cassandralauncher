@@ -403,6 +403,11 @@ options_tree = {
         'Prompt': 'AWS Secret Access Key',
         'Help': 'AWS Secret Access Key'
     },
+    'security_public_inbound_source': {
+        'Section': 'EC2',
+        'Prompt': "Security Group Public Ports' Inbound Source",
+        'Help': "Specify the security group's inbound source for public ports in CIDR format. Multiple values can be comma-separated. (e.g. '0.0.0.0/0' or '10.0.0.0/8, 192.168.1.0/24')"
+    },
     'send_s3_credentials': {
         'Section': 'S3',
         'Prompt': 'Send S3 Credentials',
@@ -698,10 +703,13 @@ def main():
 
     # Launch the cluster
     instance_type = check_cascading_options('instance_type', choices=['m1.large', 'm1.xlarge', 'm2.xlarge', 'm2.2xlarge', 'm2.4xlarge'])
-    clusterinfo = ec2.create_cluster(check_cascading_options('aws_access_key_id'), check_cascading_options('aws_secret_access_key'),
-                                    totalnodes, image, tag, KEY_PAIR,
-                                    instance_type, config.get('EC2', 'placement'), PEM_HOME,
-                                    user_data, cli_options['CLI_noprompts'], opscenterinterface)
+    clusterinfo = ec2.create_cluster(check_cascading_options('aws_access_key_id'),
+                                     check_cascading_options('aws_secret_access_key'),
+                                     totalnodes, image, tag, KEY_PAIR,
+                                     instance_type, config.get('EC2', 'placement'), PEM_HOME,
+                                     user_data, cli_options['CLI_noprompts'],
+                                     opscenterinterface,
+                                     check_cascading_options('security_public_inbound_source'))
 
     # Save IPs
     global private_ips
