@@ -226,7 +226,7 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
 
         # Tag the instances in this reservation
         for instance in reservation.instances:
-            conn.create_tags([instance.id], {'Name': tag, 'Initializer': 'DataStax', 'user': handle})
+            conn.create_tags([instance.id], {'Name': tag, 'Initializer': 'DataStax', 'provisioner': 'cassandralauncher', 'user': handle})
     except (Exception, KeyboardInterrupt, EOFError) as err:
         print "\n\nERROR: Tags were never applied to started instances!!! Make sure you TERMINATE instances here:"
         print "    https://console.aws.amazon.com/ec2/home?region=us-east-1#s=Instances\n"
