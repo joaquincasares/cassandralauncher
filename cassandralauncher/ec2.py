@@ -90,7 +90,7 @@ def print_boto_error():
 
 
 
-def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, image, tag, key_pair, instance_type, placement, pem_home, user_data=None, noprompts=False, opscenterinterface=False, security_public_inbound_source='0.0.0.0/0'):
+def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, image, handle, tag, key_pair, instance_type, placement, pem_home, user_data=None, noprompts=False, opscenterinterface=False, security_public_inbound_source='0.0.0.0/0'):
 
     # Connect to EC2
     print 'Starting an EC2 cluster of type {0} with image {1}...'.format(instance_type, image)
@@ -226,7 +226,7 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
 
         # Tag the instances in this reservation
         for instance in reservation.instances:
-            conn.create_tags([instance.id], {'Name': tag, 'Initializer': 'DataStax'})
+            conn.create_tags([instance.id], {'Name': tag, 'Initializer': 'DataStax', 'user': handle})
     except (Exception, KeyboardInterrupt, EOFError) as err:
         print "\n\nERROR: Tags were never applied to started instances!!! Make sure you TERMINATE instances here:"
         print "    https://console.aws.amazon.com/ec2/home?region=us-east-1#s=Instances\n"

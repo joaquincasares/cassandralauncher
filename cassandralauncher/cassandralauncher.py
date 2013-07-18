@@ -705,7 +705,7 @@ def main():
     instance_type = check_cascading_options('instance_type', choices=['m1.large', 'm1.xlarge', 'm2.xlarge', 'm2.2xlarge', 'm2.4xlarge'])
     clusterinfo = ec2.create_cluster(check_cascading_options('aws_access_key_id'),
                                      check_cascading_options('aws_secret_access_key'),
-                                     totalnodes, image, tag, KEY_PAIR,
+                                     totalnodes, image, check_cascading_options('handle'), tag, KEY_PAIR,
                                      instance_type, config.get('EC2', 'placement'), PEM_HOME,
                                      user_data, cli_options['CLI_noprompts'],
                                      opscenterinterface,
