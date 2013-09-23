@@ -477,7 +477,7 @@ options_tree = {
     'instance_type': {
         'Section': 'EC2',
         'Prompt': 'EC2 Instance Size:',
-        'Help': 'm1.large | m1.xlarge | m2.xlarge | m2.2xlarge | m2.4xlarge'
+        'Help': 'm1.large | m1.xlarge | m2.xlarge | m2.2xlarge | m2.4xlarge | hi1.4xlarge | hs1.8xlarge'
     },
     'opscenterinterface': {
         'Section': 'OpsCenter',
@@ -702,7 +702,7 @@ def main():
     user = 'ubuntu'
 
     # Launch the cluster
-    instance_type = check_cascading_options('instance_type', choices=['m1.large', 'm1.xlarge', 'm2.xlarge', 'm2.2xlarge', 'm2.4xlarge'])
+    instance_type = check_cascading_options('instance_type', choices=['m1.large', 'm1.xlarge', 'm2.xlarge', 'm2.2xlarge', 'm2.4xlarge', 'hi1.4xlarge', 'hs1.8xlarge'])
     clusterinfo = ec2.create_cluster(check_cascading_options('aws_access_key_id'),
                                      check_cascading_options('aws_secret_access_key'),
                                      totalnodes, image, check_cascading_options('handle'), tag, KEY_PAIR,
