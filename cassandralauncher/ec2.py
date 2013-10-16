@@ -29,17 +29,6 @@ def authorize(security_group, port, realm, port_end_range=False, public_inbound_
         # Open ports publicly
         if realm == 'public':
             sources = {s.strip() for s in public_inbound_source.split(',')}
-            for rule in security_group.rules:
-                if (rule.ip_protocol == 'tcp' and int(rule.from_port) == port and
-                    int(rule.to_port) == port_end_range):
-                    grants = {g.cidr_ip for g in rule.grants
-                              if g.group_id != security_group.id}
-                    if grants == sources:
-                        # Rule already exists and is correct
-                        return
-                    if grants:
-                      deauthorize(security_group, port, port_end_range)
-                    break
             security_group.authorize('tcp', port, port_end_range, list(sources))
         # Open ports privately
         elif realm == 'private':
@@ -162,9 +151,6 @@ def create_cluster(aws_access_key_id, aws_secret_access_key, reservation_size, i
 
     # Ensure all Security settings are active
     print "Configuring ports..."
-
-    # Remove previous security risks made public
-    deauthorize(ds_security_group, 9160)
 
     if not security_public_inbound_source:
         security_public_inbound_source = '0.0.0.0/0'
