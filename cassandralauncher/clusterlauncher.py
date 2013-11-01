@@ -240,7 +240,7 @@ def main():
             instance_type = common.choose('Choose your Instance Size:', ['m1.large', 'm1.xlarge', 'm2.xlarge', 'm2.2xlarge', 'm2.4xlarge'])
 
         clusterinfo = ec2.create_cluster(config.get('EC2', 'aws_access_key_id'), config.get('EC2', 'aws_secret_access_key'),
-                                        reservation_size, image, check_cascading_options('handle'), tag, KEY_PAIR,
+                                        reservation_size, image, 'imagelauncher', tag, KEY_PAIR,
                                         instance_type, config.get('EC2', 'placement'), PEM_HOME, user_data)
         private_ips, public_ips, reservation = clusterinfo
 
