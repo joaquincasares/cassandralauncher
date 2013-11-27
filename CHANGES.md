@@ -16,6 +16,7 @@ See [New Features](https://github.com/joaquincasares/cassandralauncher/tree/mast
 * 1.18-7: Updated to the newest 2.4 AMI built on Ubuntu 12.04 LTS. (No other major changes made during this transition.)
 * 1.19-4: Be less aggressive with the security group.
 * 1.19-5: Remove handle requirement for imagelauncher.
+* 1.19-6: Stop installing OpsCenter agents and rely on datastax-agent logic on the AMI.
 
 Automated Features
 ==================

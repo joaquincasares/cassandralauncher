@@ -315,48 +315,6 @@ def start_priming(user):
     prime_connections(public_ips, user)
     print
 
-def install_opsc_agents(user):
-    """Wait for OpsCenter agent tarball to be created. Then install the agent on all other nodes."""
-
-    if check_cascading_options('installopscenter', optional=True) != 'False':
-        # Connection to the OpsCenter machine to be used later
-        opsc_conn = create_ssh_cmd(user, public_ips[0])
-
-        print "Waiting for the agent tarball to be created (This can take up to 4 minutes)..."
-        print "    If taking longer, ctrl-C and login to AMI to see error logs."
-        while 'cannot access' in exe_ssh_cmd(opsc_conn, "ls /usr/share/opscenter/agent.tar.gz")[1]:
-            # The agent tarball has yet to be created
-            time.sleep(5)
-
-        # Ensures the tarball is fully written before transferring
-        while True:
-            old_md5 = exe_ssh_cmd(opsc_conn, "md5sum /usr/share/opscenter/agent.tar.gz")[0]
-            time.sleep(2)
-            new_md5 = exe_ssh_cmd(opsc_conn, "md5sum /usr/share/opscenter/agent.tar.gz")[0]
-
-            if old_md5 == new_md5:
-                break
-
-        print "Installing OpsCenter Agents..."
-        for i, node in enumerate(public_ips):
-            node_conn = create_ssh_cmd(user, node)
-
-            # Copying OpsCenter Agent tarball
-            exe_ssh_cmd(opsc_conn, "scp /usr/share/opscenter/agent.tar.gz %s:agent.tar.gz" % node)
-
-            # OpsCenter 2.1.0 workaround
-            exe_ssh_cmd(opsc_conn, "scp -r /usr/share/opscenter/agent/ssl %s:" % node)
-
-            # Untarring tarball
-            exe_ssh_cmd(node_conn, "sudo mv -f agent.tar.gz /usr/share; cd /usr/share; sudo tar --overwrite -xzf agent.tar.gz; sudo rm -f agent.tar.gz")
-
-            # Starting installation of OpsCenter Agent
-            exe_ssh_cmd(node_conn, "cd /usr/share/agent/; sudo bin/install_agent.sh opscenter-agent.deb %s %s" % (private_ips[0], private_ips[i]))
-
-            # OpsCenter 2.1.0 workaround
-            exe_ssh_cmd(node_conn, "sudo mv ssl/* /var/lib/opscenter-agent/ssl; rm -rf ssl; sudo service opscenter-agent restart")
-    print
-
 #################################
 
 #################################
@@ -771,8 +729,6 @@ def main():
 
     print 'Setting up datastax_s3_store and datastax_s3_restore capabilities...'
     setup_s3_store_and_restore(user)
-
-    install_opsc_agents(user)
 
     end_time = int(time.time() - start_time)
     print 'Total Elapsed Time: %s minutes %s seconds' % (end_time / 60, end_time % 60)

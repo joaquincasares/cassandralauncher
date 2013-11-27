@@ -20,7 +20,7 @@ Both run off of a config: clusterlauncher.conf.
 """
 
 setup(name='CassandraLauncher',
-      version='1.19-5',
+      version='1.19-6',
       description='Command line utilities for launching Cassandra clusters in EC2',
       long_description=long_description,
       author='Joaquin Casares',
