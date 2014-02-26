@@ -101,6 +101,8 @@ def install_datastax_ssh(user):
     datastax_ssh = os.path.join(os.path.dirname(__file__), 'datastax_ssh')
     if not os.path.exists(datastax_ssh):
         datastax_ssh = os.path.join('/etc', 'cassandralauncher', 'datastax_ssh')
+    if not os.path.exists(datastax_ssh):
+        datastax_ssh = os.path.join('/usr', 'local', 'etc', 'cassandralauncher', 'datastax_ssh')
 
     # Write the public IPs to the nodelist file
     with tempfile.NamedTemporaryFile() as tmp_file:
@@ -160,6 +162,9 @@ def setup_s3_store_and_restore(user):
     if not os.path.exists(s3cfg_default):
         # Look for the configuration file in /etc/clusterlauncher
         s3cfg_default = os.path.join('/etc', 'cassandralauncher', 's3cfg')
+    if not os.path.exists(s3cfg_default):
+        # Look for the configuration file in /usr/local/etc/clusterlauncher
+        s3cfg_default = os.path.join('/usr', 'local', 'etc', 'cassandralauncher', 's3cfg')
     with open(s3cfg_default) as f:
         s3cfg = f.read()
 

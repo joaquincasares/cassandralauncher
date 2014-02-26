@@ -29,6 +29,9 @@ def header():
         if not os.path.exists(configfile):
             # Look for the configuration file in /etc/clusterlauncher
             defaultfile = os.path.join('/etc', 'cassandralauncher', 'clusterlauncher.conf')
+        if not os.path.exists(configfile):
+            # Look for the configuration file in /usr/local/etc/clusterlauncher
+            defaultfile = os.path.join('/usr', 'local', 'etc', 'cassandralauncher', 'clusterlauncher.conf')
             configfile = os.path.join(os.path.expanduser('~'), '.clusterlauncher.conf')
             shutil.copyfile(defaultfile, configfile)
 
@@ -48,6 +51,7 @@ def header():
             sys.stderr.write("    {0}\n".format(os.path.join(os.path.dirname(__file__), 'clusterlauncher.conf')))
             sys.stderr.write("    {0}\n".format(os.path.join(os.path.expanduser('~'), '.clusterlauncher.conf')))
             sys.stderr.write("    {0}\n".format(os.path.join('/etc', 'cassandralauncher', 'clusterlauncher.conf')))
+            sys.stderr.write("    {0}\n".format(os.path.join('/usr', 'local', 'etc', 'cassandralauncher', 'clusterlauncher.conf')))
             sys.exit(1)
     
     # Read configuration file

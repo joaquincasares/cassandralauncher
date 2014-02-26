@@ -19,7 +19,7 @@ Make sure `python-setuptools` and `python-pip` are installed, then run:
 
 ## Setup
 
-Start the program once to copy the default `/etc/cassandralauncher/clusterlauncher.conf` to `~/.clusterlauncher.conf`.
+Start the program once to copy the default `/usr/local/etc/cassandralauncher/clusterlauncher.conf` to `~/.clusterlauncher.conf`.
 
 Exit the program and edit `~/.clusterlauncher.conf` with your appropriate authentication parameters.
 

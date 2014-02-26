@@ -29,7 +29,7 @@ setup(name='CassandraLauncher',
       packages=['cassandralauncher'],
       scripts=['scripts/cassandralauncher', 'scripts/imagelauncher'],
       package_data={'': ['README.md']},
-      data_files=[('/etc/cassandralauncher', [
+      data_files=[('/usr/local/etc/cassandralauncher', [
             'cassandralauncher/clusterlauncher.conf',
             'cassandralauncher/datastax_s3_store',
             'cassandralauncher/datastax_s3_restore',
