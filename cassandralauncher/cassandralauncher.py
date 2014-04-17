@@ -432,6 +432,11 @@ options_tree = {
         'Prompt': 'DataStax AMI ID',
         'Help': 'DataStax AMI ID'
     },
+    'dev': {
+        'Section': 'Cassandra',
+        'Prompt': 'Dev Branch',
+        'Help': 'Dev Branch'
+    },
     'demotime': {
         'Section': 'Cassandra',
         'Prompt': 'Time (in hours) for the cluster to live',
@@ -655,6 +660,9 @@ def main():
     if check_cascading_options('opscenterinterface', optional=True):
         opscenterinterface = check_cascading_options('opscenterinterface')
         user_data += ' --opscenterinterface %s' % opscenterinterface
+
+    if check_cascading_options('dev', optional=True):
+        user_data += ' --forcecommit origin/dev-2.5'
 
     # DataStax AMI specific options and formatting
     image = check_cascading_options('datastax_ami', optional=True)
