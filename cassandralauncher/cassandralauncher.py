@@ -435,6 +435,7 @@ options_tree = {
     'dev': {
         'Section': 'Cassandra',
         'Prompt': 'Dev Branch',
+        'Action': 'store_true',
         'Help': 'Dev Branch'
     },
     'demotime': {
