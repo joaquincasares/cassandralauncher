@@ -251,7 +251,10 @@ def terminate_cluster(aws_access_key_id, aws_secret_access_key, placement, searc
 
     for reservation in reservations:
         if 'Initializer' in reservation.instances[0].tags and reservation.instances[0].tags['Initializer'] == 'DataStax' and reservation.instances[0].update() == 'running':
-            if not reservation.instances[0].tags['Name'] in ds_reservations and search_term.lower() in reservation.instances[0].tags['Name'].lower():
+            if 'Name' in reservation.instances[0].tags \
+                    and not reservation.instances[0].tags['Name'] in ds_reservations \
+                    and search_term.lower() in reservation.instances[0].tags['Name'].lower():
+
                 ds_reservations[reservation.instances[0].tags['Name']] = {
                     'Reservation': reservation
                 }
