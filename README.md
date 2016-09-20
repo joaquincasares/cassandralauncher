@@ -1,4 +1,4 @@
-# Cassandra Launcher (and Plain Image Launcher)
+# Apache Cassandra / DataStax Community/Enterprise Launcher (and Plain Image Launcher)
 
 This project has two offerings. They are:
 
@@ -23,7 +23,7 @@ Start the program once to copy the default `/usr/local/etc/cassandralauncher/clu
 
 Exit the program and edit `~/.clusterlauncher.conf` with your appropriate authentication parameters.
 
-## Cassandra Launcher
+## Apache Cassandra / DataStax Community/Enterprise Launcher
 
     cassandralauncher
 
@@ -57,7 +57,7 @@ present the option to kill a cluster these tools did not launch.
 * [Sample Runs](https://github.com/joaquincasares/cassandralauncher/tree/master/docs/sample_runs.md)
 * [New Features](https://github.com/joaquincasares/cassandralauncher/tree/master/docs/new_features.md)
 
-## Programmatically Launching Cassandra Clusters
+## Programmatically Launching Apache Cassandra / DataStax Community/Enterprise Clusters
 
 Run:
 
